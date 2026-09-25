@@ -1,0 +1,10 @@
+/build/
+/out/
+*.img
+*.dtb
+*.dtbo
+*.cpio
+*.cpio.gz
+*.tar
+*.zip
+*.apk
