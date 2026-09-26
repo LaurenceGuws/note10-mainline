@@ -45,20 +45,21 @@ Do not let modem/telephony completeness distract from the compute-appliance prod
 
 ## Physical safety
 
-`note10-platform/docs/CURRENT_STATE.md` is the authority for the current accepted
-physical BOOT and rollback state. Do not let a copied hash in this repository
-silently become newer authority.
+`note10-platform` owns the maintained platform state, but a physical mainline
+test must freeze rollback from a fresh read of the phone itself. If maintained
+documentation and the live BOOT disagree, stop promotion and use the physical
+read as the candidate/rollback boundary until the platform bookkeeping is
+reconciled.
 
 Before any physical mainline test, freeze a candidate receipt that records and
-verifies the exact current live BOOT path, SHA-256 and size from
-`note10-platform`. That frozen image is the immediate rollback target for the
-experiment.
+verifies the exact current live BOOT mapping, SHA-256 and size on the phone.
+That frozen image is the immediate rollback target for the experiment.
 
 For the tranche being prepared on 2026-09-26, the verified snapshot is:
 
-- BOOT SHA-256: `b5b6f5cc40baaaab8baa83946120aed70200ff9371304d8b272db9a930e5953e`
+- BOOT SHA-256: `1a78e5117cf23b3cab5547da2369018066c9ddac27307e97fce46026647ae2f9`
 - size: `57,671,680` bytes
-- artifact: `~/personal/phone_lab/note10-lineage-2026-08-09/root-stage/receipts/direct-init-boot-candidate-20260924T104300Z/candidate-direct-init.img`
+- workstream rollback copy: `~/.local/state/workstreams/note10-mainline/rollback/live-boot-20260926-1a78.img`
 
 No unattended Download Mode transition, BOOT flash, raw partition write or reboot into an unreviewed candidate. Offline research/build work may proceed autonomously. Stop for Captain at the physical mutation boundary or for a genuine architecture choice with material long-term consequences.
 

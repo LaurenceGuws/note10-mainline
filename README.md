@@ -43,20 +43,23 @@ See `docs/BRINGUP.md`.
 
 ## Current physical rollback authority
 
-The moving authority for the phone's accepted physical state is
-`~/personal/note10-platform/docs/CURRENT_STATE.md`. This repository records a
-snapshot only when a concrete mainline candidate is being frozen; it must not
-become a competing source of truth.
+`note10-platform` owns the maintained platform definition. A mainline physical
+test additionally requires a fresh read of `/dev/block/by-name/boot` from the
+phone itself so rollback follows physical reality rather than a stale copied
+hash.
 
 Snapshot checked for the 2026-09-26 UFS bring-up tranche:
 
-- current live BOOT SHA-256: `b5b6f5cc40baaaab8baa83946120aed70200ff9371304d8b272db9a930e5953e`
+- current live BOOT SHA-256: `1a78e5117cf23b3cab5547da2369018066c9ddac27307e97fce46026647ae2f9`
 - BOOT partition/image size: `57,671,680` bytes
-- exact live artifact:
-  `~/personal/phone_lab/note10-lineage-2026-08-09/root-stage/receipts/direct-init-boot-candidate-20260924T104300Z/candidate-direct-init.img`
+- physically verified mapping: `/dev/block/by-name/boot` -> `/dev/block/sda14`
+- frozen workstream rollback copy:
+  `~/.local/state/workstreams/note10-mainline/rollback/live-boot-20260926-1a78.img`
 
-The external phone lab remains the artifact authority. Re-check the platform
-state immediately before every attended physical test.
+The live read on 2026-09-26 disagreed with the then-current
+`note10-platform/docs/CURRENT_STATE.md` value `b5b6f5cc...`; no mainline phone
+mutation had occurred. Re-check the physical BOOT immediately before every
+attended mainline test.
 
 ## Safety boundary
 
