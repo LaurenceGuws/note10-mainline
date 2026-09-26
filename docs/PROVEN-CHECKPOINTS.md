@@ -20,14 +20,15 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
+`8dd7d4d2a160b1072f76c2d84ee30dce1bbaa8523fa53a4ecb72f9143f07d591`
 
-It physically proves genuine `start_kernel` entry through the stable rose
-first-source marker and remains installed.
+It physically proves the first ordinary `start_kernel` initialization cluster
+through `boot_cpu_init()` using the stable pure-green marker and remains
+installed.
 
 Previous proven MAINLINE checkpoint:
 
-`bc4a78a9dfad41992777b42913394735e893a709e52e06309d482478a1307f94`
+`3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
 
 ### Android RECOVERY checkpoint
 

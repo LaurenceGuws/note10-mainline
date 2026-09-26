@@ -319,3 +319,14 @@ The next offline candidate removes only the rose hold, lets the first ordinary
 672..703 pure green (`0xff00ff00`) and deliberately holds before banner
 printing or `setup_arch()`. See
 `diagnostics/start-kernel-ordinary-marker/README.md`.
+
+The attended test produced the expected pure-green rows 672..703 and they
+remained stable for at least three minutes. This physically proves the first
+ordinary `start_kernel` cluster through `boot_cpu_init()`, including CPU0
+publication / its printk path and IRQ-disable publication, while banner
+printing and `setup_arch()` remain unreachable. See
+`docs/2026-09-26-ordinary-start-kernel-proof.md`.
+
+The exact BOOT
+`8dd7d4d2a160b1072f76c2d84ee30dce1bbaa8523fa53a4ecb72f9143f07d591`
+is promoted as the newest proven MAINLINE checkpoint and remains installed.
