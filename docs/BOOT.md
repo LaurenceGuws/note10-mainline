@@ -302,3 +302,14 @@ original `bl start_kernel`, and places a direct arm64 rose framebuffer marker
 as the first explicit source statement inside `start_kernel`, followed by an
 immediate hold. It deliberately keeps every ordinary `start_kernel` operation
 unreachable. See `diagnostics/start-kernel-entry-marker/README.md`.
+
+The attended test produced the expected rose (`0xffff4080`) rows 672..703 and
+they remained stable for at least three minutes. This physically proves genuine
+`start_kernel` entry, including its compiler SCS/frame/auto-init entry work,
+while every ordinary `start_kernel` operation remains unreachable. See
+`docs/2026-09-26-start-kernel-entry-proof.md`.
+
+The exact BOOT
+`3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
+is promoted as the newest proven MAINLINE checkpoint and remains installed.
+No Android rollback occurs after this PASS.

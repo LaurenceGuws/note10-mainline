@@ -20,9 +20,14 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`bc4a78a9dfad41992777b42913394735e893a709e52e06309d482478a1307f94`
+`3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
 
-Its physical proof is recorded at repository checkpoint `6e3844e`.
+It physically proves genuine `start_kernel` entry through the stable rose
+first-source marker and remains installed.
+
+Previous proven MAINLINE checkpoint:
+
+`bc4a78a9dfad41992777b42913394735e893a709e52e06309d482478a1307f94`
 
 ### Android RECOVERY checkpoint
 
