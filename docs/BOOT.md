@@ -336,3 +336,18 @@ banner print and safe arm64 `setup_arch()` work complete through
 `local_daif_restore()`, then paints rows 672..703 pure blue (`0xff0000ff`) and
 holds before **any** `cpu_uninstall_idmap()` / TTBR0-teardown preparation.
 See `diagnostics/setup-arch-pre-idmap-marker/README.md`.
+
+The attended test produced the expected pure-blue rows 672..703 and they
+remained stable for at least three minutes. This physically proves banner
+printing returned and every safe pre-teardown `setup_arch()` operation
+completed through `local_daif_restore()`, while zero
+`cpu_uninstall_idmap()`-attributable linked instruction executed. See
+`docs/2026-09-26-setup-arch-pre-idmap-proof.md`.
+
+The exact BOOT
+`6f7c807ef733582d1f200a38aac11285d82b0c055447b20071352a058e713204`
+is promoted as the newest proven MAINLINE checkpoint and remains installed.
+
+This is also the end of the current low-TTBR0 framebuffer evidence sink. Any
+diagnostic after `cpu_uninstall_idmap()` must first establish or prove a new
+mapping/evidence mechanism.

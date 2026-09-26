@@ -20,15 +20,16 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`8dd7d4d2a160b1072f76c2d84ee30dce1bbaa8523fa53a4ecb72f9143f07d591`
+`6f7c807ef733582d1f200a38aac11285d82b0c055447b20071352a058e713204`
 
-It physically proves the first ordinary `start_kernel` initialization cluster
-through `boot_cpu_init()` using the stable pure-green marker and remains
-installed.
+It physically proves kernel-banner return plus every safe pre-teardown
+`setup_arch()` operation through `local_daif_restore()`, using a stable
+pure-blue marker placed before **all** `cpu_uninstall_idmap()`-attributable
+linked work. It remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
+`8dd7d4d2a160b1072f76c2d84ee30dce1bbaa8523fa53a4ecb72f9143f07d591`
 
 ### Android RECOVERY checkpoint
 
