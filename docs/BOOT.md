@@ -360,3 +360,45 @@ then paints the band pure yellow (`0xffffff00`) through the returned high VA
 and holds. NULL preserves blue and holds. `early_memunmap()` and
 `cpu_uninstall_idmap()` remain unreachable. See
 `diagnostics/post-idmap-evidence-bridge/README.md`.
+
+The yellow high-TTBR1 bridge checkpoint then became the evidence sink for one
+bounded post-idmap / pre-paging phase. Three reviewed physical checkpoints
+advanced the original `setup_arch()` path without replacing or unmapping that
+bridge:
+
+1. P1 removed only the yellow hold, executed `cpu_uninstall_idmap()` in full,
+   rebound the surviving ordinary C bridge state to `x9`, painted pure red
+   (`0xffff0000`), and held before `xen_early_init()`. The red hold remained
+   stable for at least three minutes. Exact promoted BOOT:
+   `f4383f57b057543b9f5eb10d7d8fe568f12e28fb37eafca0b2826c1ae70fdd8a`.
+2. P2 removed only the red hold, executed the original `xen_early_init()` and
+   `efi_init()` plus the untouched runtime-selected EFI warning/taint
+   continuation, then painted violet (`0xff8000ff`) and held before
+   `arm64_memblock_init()`. Physical PASS was recorded and exact BOOT
+   `21f25494c348ea886717128762a6e371e9428aff43c448f630fca359297e82de`
+   was promoted.
+3. P3 removed only the violet hold, executed the original
+   `arm64_memblock_init()` unchanged, rebound the surviving bridge `x20 -> x9`,
+   painted pure cyan (`0xff00ffff`), and held before `paging_init()`. The cyan
+   hold remained unchanged for at least three minutes. Exact promoted BOOT:
+   `3a66d98bcfa76de7f9f598eba839f5ccc4a096c4ca50f6cacd5e44fe87eb6d27`.
+
+The final linked P3 boundary is:
+
+```text
+ffff800082214bd8  bl arm64_memblock_init
+ffff800082214bdc  mov x9, x20
+ffff800082214be0  cyan marker begins
+ffff800082214c0c  dsb sy
+ffff800082214c10  wfe
+ffff800082214c14  b ffff800082214c10
+
+-- unreachable --
+
+ffff800082214c18  bl paging_init
+```
+
+This closes the post-idmap / pre-paging phase. The next architectural boundary
+is `paging_init()`. It requires a new bounded phase plan/review before physical
+work crosses that call. See
+`docs/2026-09-26-post-idmap-pre-paging-proof.md`.

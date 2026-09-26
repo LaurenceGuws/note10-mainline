@@ -20,16 +20,24 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`6f7c807ef733582d1f200a38aac11285d82b0c055447b20071352a058e713204`
+`3a66d98bcfa76de7f9f598eba839f5ccc4a096c4ca50f6cacd5e44fe87eb6d27`
 
-It physically proves kernel-banner return plus every safe pre-teardown
-`setup_arch()` operation through `local_daif_restore()`, using a stable
-pure-blue marker placed before **all** `cpu_uninstall_idmap()`-attributable
-linked work. It remains installed.
+It physically proves the complete accepted post-idmap / pre-paging phase:
+`cpu_uninstall_idmap()`, `xen_early_init()`, `efi_init()`, the original
+runtime-selected EFI warning/taint continuation, and
+`arm64_memblock_init()` all return while the established high-TTBR1
+framebuffer bridge remains visibly writable. The final pure-cyan
+`0xff00ffff` marker remained unchanged for at least three minutes.
+`paging_init()` remains unreachable behind the deliberate cyan hold. The
+checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`8dd7d4d2a160b1072f76c2d84ee30dce1bbaa8523fa53a4ecb72f9143f07d591`
+`21f25494c348ea886717128762a6e371e9428aff43c448f630fca359297e82de`
+
+The previous checkpoint physically proves the original Xen / EFI /
+warning-taint continuation and ends at the violet hold immediately before
+`arm64_memblock_init()`.
 
 ### Android RECOVERY checkpoint
 
