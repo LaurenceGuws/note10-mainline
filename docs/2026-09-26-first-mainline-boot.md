@@ -34,13 +34,16 @@ not become visible. ADB and Samsung Download Mode USB both disappeared during
 the mainline attempt, consistent with the intentionally absent USB gadget stack
 in this first candidate.
 
-This moves the failure boundary past Android BOOT parsing and past uniLoader's
-own initialization. The failure occurs after uniLoader's final handoff into the
-mainline Image and before any visible proof of `/init`.
+Independent review corrected the initial interpretation of this marker.
+uniLoader prints `Booting kernel...` in `boot_kernel()` **before**
+`arch_load_kernel()` copies the Linux Image and initramfs. The observation
+therefore proves Android BOOT parsing and the visible uniLoader path, but does
+not prove that either copy completed or that `load_kernel_and_jump()` executed
+its final `br x4`.
 
-It does **not** yet prove whether the reset occurs before the first kernel
-instruction, during earliest arm64 entry, during DT/console initialization, or
-later before initramfs execution.
+The unresolved boundary begins at the Image/initramfs copies and extends
+through the first instructions at arm64 `primary_entry`. A two-sided marker
+candidate is the next earned test.
 
 ## Rollback
 
@@ -70,8 +73,8 @@ mainline panic/oops record. Its visible early-boot material corresponds to the
 Samsung/vendor boot path.
 
 So the first attempt yielded no durable mainline crash log. The next candidate
-must improve evidence at the kernel-entry boundary rather than changing UFS
-blindly.
+must improve evidence across the copy-to-`primary_entry` boundary rather than
+changing UFS blindly.
 
 ## Earned next question
 

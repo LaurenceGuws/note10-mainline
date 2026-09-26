@@ -168,5 +168,10 @@ The reviewed candidate was tested once on 2026-09-26. uniLoader reached
 visible. The exact `1a78e511...` BOOT was restored successfully and verified
 on-device afterward.
 
-See `docs/2026-09-26-first-mainline-boot.md`. The earned next problem is now
-kernel-entry/earliest-mainline evidence, not another speculative UFS change.
+Review of the loader call order corrected one important interpretation:
+`Booting kernel...` is printed before the Image/initramfs copies, so that first
+test did **not** prove the final `br x4` into Linux. See
+`docs/2026-09-26-first-mainline-boot.md`.
+
+The earned next problem is therefore the copy-to-`primary_entry` boundary, not
+another speculative UFS change.
