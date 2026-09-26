@@ -108,7 +108,11 @@ Offline gates:
 
 - reference source builds cleanly before the change;
 - `git diff --check`: pass;
-- `scripts/checkpatch.pl --strict`: 0 errors, 0 warnings, 0 checks;
+- raw source diff through `scripts/checkpatch.pl --strict --no-tree -`:
+  0 errors, 0 warnings, 0 checks;
+- mail-format export still reports the deliberately absent Captain
+  `Signed-off-by:` plus one overlong commit-description line; those are
+  submission-message/DCO items, not source-style defects;
 - full d2s Image + DTB build: **pass**;
 - candidate commit: `0f909c956f4f5d3ebfd5217dd22b73d9b4f4fa82`;
 - candidate config SHA-256: `314c3cea10b92a6078cf2eb2ede2fa11189d940d4d62bd810a280c446a287e37` (identical to reference);
@@ -142,3 +146,12 @@ physical candidate must prove, in order:
 5. repeated I/O survives idle periods without hibern8/reset regressions.
 
 No writable-root experiment is earned before those gates pass.
+
+## Durable patch export
+
+The candidate commit is exported in this repository as
+`kernel/patches/0001-scsi-ufs-fix-exynos9820-prdt-length-with-fmp.patch`.
+
+Its stable patch-id is
+`cff09f6580b2cc00862c718bcd8038a3b77768df` and its SHA-256 is
+`f04cb2e21aa75d43c20a9813e868078737a43cf75a0d37800e114b736256581d`.

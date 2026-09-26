@@ -1,0 +1,89 @@
+From 0f909c956f4f5d3ebfd5217dd22b73d9b4f4fa82 Mon Sep 17 00:00:00 2001
+From: Laurence <lggousie46@gmail.com>
+Date: Sat, 26 Sep 2026 01:31:02 +0200
+Subject: [PATCH] scsi: ufs: fix Exynos9820 PRDT length with FMP
+
+Exynos9820 uses byte-granular PRDT lengths, but the encoded length is based on the standard 16-byte PRD size even when FMP expands the in-memory PRD stride to 128 bytes.
+
+The d2s bring-up tree currently multiplies the number of scatterlist entries by the variant PRD stride. With FMP enabled this advertises 144 bytes for a one-segment request instead of the 32 bytes programmed by the working Samsung driver.
+
+Keep the variant stride for descriptor allocation and iteration, but use the standard PRD size when encoding and decoding the Exynos9820 length quirk.
+
+Assisted-by: ChatGPT:GPT-5.6 Sol
+---
+ drivers/ufs/core/ufshcd.c     | 18 +++++++++++++-----
+ drivers/ufs/host/ufs-exynos.c |  4 ++--
+ include/ufs/ufshcd.h          |  5 +++--
+ 3 files changed, 18 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/ufs/core/ufshcd.c b/drivers/ufs/core/ufshcd.c
+index c155cf556..7f449d952 100644
+--- a/drivers/ufs/core/ufshcd.c
++++ b/drivers/ufs/core/ufshcd.c
+@@ -632,10 +632,13 @@ static void ufshcd_print_tr(struct ufs_hba *hba, struct scsi_cmnd *cmd,
+ 	prdt_length = le16_to_cpu(
+ 		lrbp->utr_descriptor_ptr->prd_table_length);
+ 	if (hba->quirks & UFSHCD_QUIRK_PRDT_BYTE_GRAN) {
+-		if (prdt_length &&
+-		    hba->quirks & UFSHCD_QUIRK_PRDT_LEN_INCLUDES_HEADER)
+-			prdt_length -= sizeof(struct ufshcd_sg_entry);
+-		prdt_length /= ufshcd_sg_entry_size(hba);
++		if (hba->quirks & UFSHCD_QUIRK_PRDT_LEN_INCLUDES_HEADER) {
++			if (prdt_length)
++				prdt_length -= sizeof(struct ufshcd_sg_entry);
++			prdt_length /= sizeof(struct ufshcd_sg_entry);
++		} else {
++			prdt_length /= ufshcd_sg_entry_size(hba);
++		}
+ 	}
+ 
+ 	dev_err(hba->dev,
+@@ -2724,8 +2727,13 @@ static void ufshcd_sgl_to_prdt(struct ufs_hba *hba, struct ufshcd_lrb *lrbp, int
+ 	if (sg_entries) {
+ 
+ 		if (hba->quirks & UFSHCD_QUIRK_PRDT_BYTE_GRAN) {
+-			size_t prdt_length = sg_entries * ufshcd_sg_entry_size(hba);
++			size_t prdt_entry_size = ufshcd_sg_entry_size(hba);
++			size_t prdt_length;
++
++			if (hba->quirks & UFSHCD_QUIRK_PRDT_LEN_INCLUDES_HEADER)
++				prdt_entry_size = sizeof(struct ufshcd_sg_entry);
+ 
++			prdt_length = sg_entries * prdt_entry_size;
+ 			if (hba->quirks & UFSHCD_QUIRK_PRDT_LEN_INCLUDES_HEADER)
+ 				prdt_length += sizeof(struct ufshcd_sg_entry);
+ 			lrbp->utr_descriptor_ptr->prd_table_length =
+diff --git a/drivers/ufs/host/ufs-exynos.c b/drivers/ufs/host/ufs-exynos.c
+index c5898edbc..93256a643 100644
+--- a/drivers/ufs/host/ufs-exynos.c
++++ b/drivers/ufs/host/ufs-exynos.c
+@@ -2846,8 +2846,8 @@ static const struct exynos_ufs_drv_data exynos9820_ufs_drvs = {
+ 	 * d2s bring-up quirk catalog (exynos9825, SM-N975F).  Each entry
+ 	 * masks a failure mode observed with this UFS PHY/HCI:
+ 	 *  - PRDT_BYTE_GRAN:          PRDT size field is in bytes, not 32B units
+-	 *  - PRDT_LEN_INCLUDES_HEADER: Exynos9820 requires an extra 16 bytes in
+-	 *                              the byte-granular PRDT length
++	 *  - PRDT_LEN_INCLUDES_HEADER: Exynos9820 encodes PRDT length as
++	 *                              16 bytes per SG plus an extra 16 bytes
+ 	 *  - SKIP_RESET_INTR_AGGR:    controller rejects SW reset of the
+ 	 *                             interrupt aggregation timer/counter
+ 	 *  - BROKEN_REQ_LIST_CLR:     transfer/task request list clear bit
+diff --git a/include/ufs/ufshcd.h b/include/ufs/ufshcd.h
+index 92f3410b7..2cc471e3c 100644
+--- a/include/ufs/ufshcd.h
++++ b/include/ufs/ufshcd.h
+@@ -727,8 +727,9 @@ enum ufshcd_quirks {
+ 
+ 	/*
+ 	 * This quirk needs to be enabled if the host controller expects the
+-	 * byte-granular PRDT length to include one standard 16-byte PRD entry
+-	 * in addition to the actual table size.
++	 * byte-granular PRDT length to be based on standard 16-byte PRD entries
++	 * and include one additional standard PRD entry, even when the driver
++	 * uses a larger variant-specific PRD stride.
+ 	 */
+ 	UFSHCD_QUIRK_PRDT_LEN_INCLUDES_HEADER		= 1 << 14,
+ 
+-- 
+2.55.0
+
