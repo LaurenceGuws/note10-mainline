@@ -291,3 +291,14 @@ pre-`start_kernel` `__primary_switched` state operation completed while
 The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
 with Android `sys.boot_completed=1`. The earned next boundary is now
 `start_kernel` entry itself.
+
+From this point, physically successful mainline diagnostics are promoted as the
+new proven MAINLINE checkpoint and normally remain installed. Android
+`1a78e511...` is retained as the immutable recovery floor rather than the
+routine rollback target. See `docs/PROVEN-CHECKPOINTS.md`.
+
+The next offline candidate removes only the proven white hold, executes the
+original `bl start_kernel`, and places a direct arm64 rose framebuffer marker
+as the first explicit source statement inside `start_kernel`, followed by an
+immediate hold. It deliberately keeps every ordinary `start_kernel` operation
+unreachable. See `diagnostics/start-kernel-entry-marker/README.md`.
