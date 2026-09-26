@@ -185,3 +185,10 @@ was EL1 with `SCTLR_EL1.M=0`, `C=0`, `I=0`; the loader target was exactly
 The exact `1a78e511...` BOOT was restored afterward and verified on-device.
 The next earned tranche is one bounded stage deeper in the original arm64
 entry path, not a loader/UFS/watchdog redesign.
+
+That next offline tranche is now frozen under
+`diagnostics/post-preserve-marker/`. It keeps the proven loader and first-body
+magenta marker, executes only the original `record_mmu_state` and
+`preserve_boot_args`, then paints the lower half cyan and deliberately holds
+before stack/idmap setup. The reproducible BOOT candidate is `138a314e...` and
+remains unflashed; live BOOT is still the verified `1a78e511...` rollback.
