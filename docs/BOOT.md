@@ -351,3 +351,12 @@ is promoted as the newest proven MAINLINE checkpoint and remains installed.
 This is also the end of the current low-TTBR0 framebuffer evidence sink. Any
 diagnostic after `cpu_uninstall_idmap()` must first establish or prove a new
 mapping/evidence mechanism.
+
+The next offline candidate proves that replacement sink without crossing
+`cpu_uninstall_idmap()`: after the established blue marker, it creates a
+temporary TTBR1 fixmap of the exact visible framebuffer band with
+`early_memremap_prot(..., PROT_NORMAL_NC)`, matching the existing low alias,
+then paints the band pure yellow (`0xffffff00`) through the returned high VA
+and holds. NULL preserves blue and holds. `early_memunmap()` and
+`cpu_uninstall_idmap()` remain unreachable. See
+`diagnostics/post-idmap-evidence-bridge/README.md`.
