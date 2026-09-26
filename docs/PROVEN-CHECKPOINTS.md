@@ -20,24 +20,28 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`213b61315c94e37f942532c6fdbe5f6dcd158a851dbe9177258036265d2ec803`
+`10eb19209719a38b677e01f5dc5afa89b14839312b2d8eae7d295f344f0068cc`
 
-It physically proves the complete accepted `paging_init()` phase:
-`map_mem()`, `memblock_allow_resize()`, `create_idmap()` and
-`declare_kernel_vmas()` all return, then `paging_init()` executes its genuine
+It physically proves the corrected pre-slab earlyfb phase. The previously
+proven E1 path enters `earlyfb_console_init()` and returns from the unchanged
+watchdog helper path while the established high-TTBR1 framebuffer bridge
+remains visibly writable. E2D then preserves the original `earlyfb_map` check,
+observes that normal slab/vmap-backed ioremap infrastructure is not available
+at this `setup_arch()` call, defers before the full framebuffer
+`ioremap_wc()` path, executes the genuine `earlyfb_console_init()`
 frame/SCS epilogue and returns normally to `setup_arch()`. The surviving
-ordinary `setup_arch` framebuffer bridge is then freshly rebound `x20 -> x9`
-and paints spring green `0xff00ff80`. That marker remained unchanged for at
-least three minutes. `earlyfb_console_init()` remains unreachable behind the
-deliberate spring-green hold. The checkpoint remains installed.
+ordinary bridge is freshly rebound `x20 -> x9` and paints teal
+`0xff00c0c0`. That marker remained unchanged for at least three minutes.
+`acpi_table_upgrade()` remains unreachable behind the deliberate teal hold.
+The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`7b12062945c4f47b8eb85b90f72d9fd57fdda6c7bf6a458f861f793876cbc1b5`
+`fcf1a6b751f49c5ef675cb883859feebacdb73ed03e059076815b47d129ba050`
 
-The previous checkpoint physically proves `memblock_allow_resize()` and
-`create_idmap()` return and ends at the electric-purple hold immediately
-before `declare_kernel_vmas()`.
+The previous checkpoint is E1. It physically proves the selected early
+watchdog-helper call returns and the existing bridge remains writable, ending
+at the amber `0xffffa000` hold before the `earlyfb_map` decision.
 
 ### Android RECOVERY checkpoint
 

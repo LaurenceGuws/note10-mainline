@@ -454,3 +454,74 @@ This closes the accepted `paging_init()` phase. The next architectural boundary
 is `earlyfb_console_init()`. It requires a new bounded phase plan/review before
 physical work crosses that call. See
 `docs/2026-09-26-paging-init-proof.md`.
+
+The next accepted phase crossed the pre-slab `earlyfb_console_init()` boundary,
+then had to be corrected after one deliberately bounded physical failure.
+
+1. E1 removed only the spring-green hold, entered `earlyfb_console_init()`,
+   let the unchanged selected `d2s_wdt_setup("early", true)` helper call
+   return, repainted the already-proven bridge amber (`0xffffa000`), and held
+   before the first `earlyfb_map` decision. Amber remained unchanged for at
+   least three minutes. Exact promoted BOOT:
+   `fcf1a6b751f49c5ef675cb883859feebacdb73ed03e059076815b47d129ba050`.
+2. The original E2 then removed only the amber hold and attempted the existing
+   full framebuffer `ioremap_wc(0xca000000, 0x10b3000)` before painting
+   azure through the returned mapping. Physical observation showed the amber
+   breadcrumb briefly, no stable azure, then reset/boot-loop. Exact failed
+   BOOT is preserved as evidence:
+   `bbfcac8fd57778e7cd489a84ddcb71966971d6e4fdee53e9150f8e39182f184e`.
+3. Static diagnosis showed the failure was architectural rather than a mystery
+   display fault. `generic_ioremap_prot()` returns NULL while
+   `slab_is_available()` is false, and this call still runs inside
+   `setup_arch()` before `mm_core_init()`. `kmem_cache_init()` makes slab
+   available later inside `mm_core_init()`, and `vmalloc_init()` later sets
+   `vmap_initialized=true`. Full ordinary ioremap therefore cannot succeed
+   at this call site. Full early-remap is also impossible because the
+   0x10b3000 framebuffer requires 4275 pages while one arm64 early-ioremap
+   slot is limited to 65 pages.
+4. Corrected E2D restarted from proven E1, preserved the amber breadcrumb,
+   preserved the original `earlyfb_map` check, then added the bounded
+   `!slab_is_available()` defer gate before the impossible full
+   `ioremap_wc()` call. On this pre-`mm_core_init()` invocation the gate
+   returns through the genuine `earlyfb_console_init()` epilogue/SCS restore
+   and `ret`. `setup_arch()` then freshly rebinds its surviving ordinary
+   bridge `x20 -> x9`, paints teal (`0xff00c0c0`), and holds immediately
+   before `acpi_table_upgrade()`. Teal remained unchanged for at least three
+   minutes. Exact promoted BOOT:
+   `10eb19209719a38b677e01f5dc5afa89b14839312b2d8eae7d295f344f0068cc`.
+
+The final linked E2D boundary is:
+
+```text
+ffff80008221548c  ldr x8, [x19, #0x2e8]
+ffff800082215490  cbnz x8, ffff8000822154d0
+ffff800082215494  bl slab_is_available
+ffff800082215498  tbz w0, #0x0, ffff8000822154d0
+
+-- full framebuffer __ioremap_prot only on slab-true path --
+
+ffff8000822154d0  ldr x19, [sp, #0x10]
+ffff8000822154d4  ldp x29, x30, [sp], #0x20
+ffff8000822154d8  ldr x30, [x18, #-0x8]!
+ffff8000822154f4  ret
+
+ffff800082214c1c  bl earlyfb_console_init
+ffff800082214c20  mov x9, x20
+ffff800082214c28  teal marker begins
+ffff800082214c50  dsb sy
+ffff800082214c54  wfe
+ffff800082214c58  b ffff800082214c54
+
+-- unreachable --
+
+ffff800082214c5c  bl acpi_table_upgrade
+```
+
+This closes the corrected pre-slab earlyfb phase. Full framebuffer
+`ioremap_wc()`, clear, console registration and `CON_PRINTBUFFER` replay are
+not proven here and are deliberately deferred to a separate future phase only
+after complete `mm_core_init()` has returned.
+
+The next immediate `setup_arch()` architectural boundary is
+`acpi_table_upgrade()`. Crossing it requires a new bounded phase plan/review.
+See `docs/2026-09-27-pre-slab-earlyfb-proof.md`.
