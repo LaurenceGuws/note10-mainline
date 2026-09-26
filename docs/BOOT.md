@@ -275,3 +275,9 @@ kernel mapping. See
 The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
 with Android `sys.boot_completed=1`. The earned next boundary is now the early
 `__primary_switched` state setup, still before `start_kernel`.
+
+The next offline candidate removes only the lime hold and reuses rows 672..703
+for amber after `init_cpu_task`, blue after VBAR installation, and white after
+FDT/kimage/boot-mode/final-EL setup plus the original frame pop. The white path
+deliberately holds immediately before `start_kernel`. See
+`diagnostics/primary-switched-state-marker/README.md`.
