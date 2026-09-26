@@ -186,13 +186,22 @@ The exact `1a78e511...` BOOT was restored afterward and verified on-device.
 The next earned tranche is one bounded stage deeper in the original arm64
 entry path, not a loader/UFS/watchdog redesign.
 
-That next offline tranche is now frozen under
+That next tranche was frozen under
 `diagnostics/post-preserve-marker/`. It keeps the proven loader and first-body
 magenta marker, executes only the original `record_mmu_state` and
 `preserve_boot_args`, then paints the lower half cyan and deliberately holds
 before stack/idmap setup. Independent review caught and rejected an offline
 cyan-range construction error before any phone mutation; the corrected
-reproducible BOOT candidate is `ac54bba7...` and remains unflashed. Live BOOT
-is still the verified `1a78e511...` rollback. R1 follow-up review returned
-`FINAL ACCEPT` for the corrected candidate, so the next action is only the
-attended BOOT-only split-stripe test when Captain is available.
+reproducible BOOT candidate was `ac54bba7...`. R1 follow-up review returned
+`FINAL ACCEPT`.
+
+The attended physical test then produced the expected magenta/cyan split and
+held stably for about five minutes. This proves `record_mmu_state` and
+`preserve_boot_args` returned successfully, including the observed MMU-off
+boot-argument cache invalidation path. See
+`docs/2026-09-26-post-preserve-proof.md`.
+
+The exact `1a78e511...` rollback BOOT was restored afterward and verified
+on-device with Android `sys.boot_completed=1`. The earned next boundary is now
+the early stack + init-idmap creation and its MMU-off page-table cache
+invalidation, still before `init_kernel_el`.

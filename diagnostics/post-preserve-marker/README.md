@@ -147,21 +147,43 @@ The verdict is recorded at:
 
 `~/.local/state/workstreams/note10-mainline/reviews/post-preserve-marker-review.md`
 
-The candidate is therefore ready for the next attended BOOT-only physical
-test, but remains unflashed. The phone continues to run rollback BOOT
-`1a78e511...`.
+The candidate was physically tested on 2026-09-26. The screen showed the
+expected final split state: rows 512..575 remained magenta and rows 576..639
+were cyan. Captain left the phone untouched for about five minutes before
+capturing the evidence photo, and the split marker remained stable throughout.
+
+The loader-side receipt remained identical to the earlier proven handoff:
+
+```text
+target=0x0000000090000000
+x0=0x000000008ba476e0
+CurrentEL=EL1
+DAIF=0x00000000000002c0
+SCTLR=0x0000000030c5083a
+```
+
+This physically proves the original `record_mmu_state` and
+`preserve_boot_args` completed and returned, including the observed MMU-off
+`dmb sy` + `dcache_inval_poc` tail path in `preserve_boot_args`.
+
+The evidence photo uploaded by Captain has SHA-256:
+
+`5c6b5e8a330913c8fbbab55d0565e6e84b2472299b403d9fcafab67f06444aeb`
+
+After observation, the exact rollback BOOT `1a78e511...` was restored to
+`BOOT` only, re-hashed on-device, and Android returned to
+`sys.boot_completed=1` on the expected 4.14 kernel.
 
 ## Future physical interpretation
 
-When Captain is available for the attended BOOT-only test:
+Physical interpretation is now resolved:
 
-- `JUMP_READY` but no magenta: regression at the already-proven entry boundary;
-- full magenta with no cyan lower half: failure/hang inside
-  `record_mmu_state` + `preserve_boot_args`; split that small boundary next;
-- magenta upper half + cyan lower half stable: both routines, including the
-  observed MMU-off `preserve_boot_args` cache invalidation path, are proven;
-- split marker then reset: investigate only the just-crossed
-  record/preserve/cache-maintenance boundary before advancing.
+- `JUMP_READY` and magenta were present;
+- magenta upper half + cyan lower half remained stable for about five minutes;
+- therefore both routines, including the observed MMU-off
+  `preserve_boot_args` cache invalidation path, are proven.
 
-No UFS, DTB, initramfs, watchdog, clock, power, display setup or later kernel
-subsystem change belongs in this tranche.
+The earned next tranche may move the hold past `__pi_create_init_idmap` and the
+subsequent MMU-off page-table `dcache_inval_poc`, still before
+`init_kernel_el`. No UFS, DTB, initramfs, watchdog, clock, power, display setup
+or later kernel subsystem change belongs in that move.
