@@ -1,4 +1,4 @@
-From d7d536f0f2449d805f3b232720a2e2e36a412b6b Mon Sep 17 00:00:00 2001
+From fbf4fedfc4f45d5fbdfadafb3e38c3aa42ce4eb0 Mon Sep 17 00:00:00 2001
 From: Laurence <lggousie46@gmail.com>
 Date: Sat, 26 Sep 2026 14:06:58 +0200
 Subject: [PATCH] arm64: mark start kernel entry
@@ -23,7 +23,7 @@ index d8b8b1d3d..5a0814a6f 100644
  	bl	start_kernel
  	ASM_BUG()
 diff --git a/init/main.c b/init/main.c
-index 3597d9b49..22bcd8e77 100644
+index 3597d9b49..a46f72be3 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -974,6 +974,50 @@ void start_kernel(void)
@@ -71,7 +71,7 @@ index 3597d9b49..22bcd8e77 100644
 +		"b 3b\n\t"
 +		:
 +		:
-+		: "x9", "x10", "x11", "x12", "x13", "x14", "cc", "memory");
++		: "x0", "x9", "x10", "x11", "x12", "x13", "x14", "cc", "memory");
 +#endif
 +
  	set_task_stack_end_magic(&init_task);

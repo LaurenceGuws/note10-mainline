@@ -9,7 +9,7 @@ Accepted parent diagnostic commit:
 
 New kernel diagnostic commit:
 
-`d7d536f0f2449d805f3b232720a2e2e36a412b6b`
+`fbf4fedfc4f45d5fbdfadafb3e38c3aa42ce4eb0`
 
 The accepted diagnostic TTBR0 framebuffer identity mapping remains unchanged.
 
@@ -44,7 +44,11 @@ diagnostic-only arm64 extended-inline-assembly block. It:
 
 - has no C operands;
 - calls no helper;
-- clobbers only `x9..x14`, condition flags and compiler memory state;
+- physically uses only `x9..x14` in marker machine instructions;
+- additionally declares `x0` as a compiler-only clobber so Clang cannot
+  hoist the following `&init_task` argument materialization across the rose
+  statement;
+- declares condition flags and compiler memory state clobbered;
 - does not name or modify `x18`, `sp`, `x29`, or `x30`;
 - reuses rows 672..703, exact range `0xca3b1000..0xca3de000`;
 - paints rose `ARGB8888 0xffff4080`;
@@ -67,37 +71,34 @@ stp x29, x30, [sp, #0x10]
 stp x20, x19, [sp, #0x20]
 add x29, sp, #0x10
 str xzr, [sp, #0x8]
-adrp x0, init_task
-add  x0, x0, ...
 <rose marker>
 <rose hold>
+adrp x0, init_task
+add  x0, x0, ...
 bl set_task_stack_end_magic
 ```
 
 The first six instructions are compiler-generated SCS/frame/stack-auto-init
-work expected by the plan review. Clang additionally hoists the pure
-`&init_task` address materialization (`adrp/add`) ahead of the inline marker.
-Those two instructions have no memory side effect and do not call or execute
-`set_task_stack_end_magic`; the first ordinary call remains after the
-unreachable rose hold.
-
-This hoist is an explicit final-review question. It is not silently treated as
-equivalent to the stricter review wording requiring the marker before all code
-associated with `set_task_stack_end_magic`.
+work expected by the plan review. The one-line compiler-only `x0` clobber
+forces the `&init_task` `adrp/add` pair to remain after the unreachable rose
+hold, so rose now precedes all code attributable to
+`set_task_stack_end_magic(&init_task)` as required by the strict placement
+contract. The marker itself still emits no x0 instruction and does not modify
+x18/SCS, `sp`, `x29`, or `x30`.
 
 ## Frozen source/build gates
 
 - patch: `kernel-start-kernel-entry-marker.patch`;
 - patch SHA-256:
-  `35502adf5a0897f46695126af39a9d7d466f7849ae87d4f4c43428e15c5265bf`;
-- stable patch-id: `af62e0e53128320d08ed14c5a507ede1c708e452`;
+  `e928a4b056a498c136ccb18f7ba9c7f3ffb3a6dbeb1382eb40f1ec3a72dde8c8`;
+- stable patch-id: `db10d9d0bd69a58ee0da4134bf7d576e762acbfd`;
 - source `git diff --check`: pass;
 - strict checkpatch: 0 errors, 0 warnings, 0 checks;
 - Android clang: 21.0.0 `r563880c`;
 - config SHA-256:
   `314c3cea10b92a6078cf2eb2ede2fa11189d940d4d62bd810a280c446a287e37`;
 - Image SHA-256:
-  `5a14b7a46641a45367eaa55b84c3291da540cf9f23e522b439dac4f91f71251f`;
+  `869d4dd7bc469e3ac5b30d7bedd54abe91c7a563e026d9e640efbef1304223ae`;
 - Image size: `44,247,552` bytes;
 - arm64 Image header remains `text_offset=0`, `image_size=0x2b10000`, flags
   `0xa`, ARM64 magic;
@@ -113,7 +114,7 @@ associated with `set_task_stack_end_magic`.
 Two independent builds of the unchanged reviewed JUMP_READY loader source are
 byte-identical:
 
-`671d0554044ce64d0cc8f9c7698a6112f116d9eae1ea16cf488dacdb9ff29fca`
+`aa34ed8eeb4a88db2db02bf24d34daa87248c4123bc3e9bb326c2866f1e3ca05`
 
 The loader remains 44,838,912 bytes with exact embedded offsets:
 
@@ -123,11 +124,11 @@ The loader remains 44,838,912 bytes with exact embedded offsets:
 
 Frozen candidate BOOT:
 
-`794bf829dc3859289f152b70806538217258f572a25a920c40a00a0d08a007bc`
+`3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
 
 Workstream path:
 
-`~/.local/state/workstreams/note10-mainline/boot-candidate/start-kernel-entry-a/candidate.img`
+`~/.local/state/workstreams/note10-mainline/boot-candidate/start-kernel-entry-fixed-a/candidate.img`
 
 Two complete packaging runs reproduced the candidate byte-for-byte.
 
