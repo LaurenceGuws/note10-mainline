@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "usage: $0 KERNEL_BUILD_DIR OUTPUT_DIR" >&2
+    exit 2
+}
+
+[[ $# -eq 2 ]] || usage
+
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+kernel_build="$(realpath "$1")"
+output_dir="$(realpath -m "$2")"
+gen_init_cpio="$kernel_build/usr/gen_init_cpio"
+zig_bin="${ZIG:-zig}"
+expected_zig="0.17.0-dev.1980+e78ea8f2c"
+
+[[ -x "$gen_init_cpio" ]] || {
+    echo "missing executable gen_init_cpio: $gen_init_cpio" >&2
+    exit 1
+}
+
+actual_zig="$("$zig_bin" version)"
+[[ "$actual_zig" == "$expected_zig" ]] || {
+    echo "unexpected Zig version: $actual_zig (expected $expected_zig)" >&2
+    exit 1
+}
+
+mkdir -p "$output_dir"
+
+"$zig_bin" test "$repo_root/initramfs/init.zig"
+zig_args=(
+    build-exe "$repo_root/initramfs/init.zig"
+    -target aarch64-linux-musl
+    -O ReleaseSmall
+    -fstrip
+    -femit-bin="$output_dir/init"
+)
+"$zig_bin" "${zig_args[@]}"
+
+cat > "$output_dir/initramfs.list" <<EOF
+# Note10 mainline UFS read-only diagnostic initramfs
+dir /dev 0755 0 0
+nod /dev/console 0600 0 0 c 5 1
+nod /dev/null 0666 0 0 c 1 3
+dir /proc 0555 0 0
+dir /sys 0555 0 0
+file /init $output_dir/init 0755 0 0
+EOF
+
+"$gen_init_cpio" -t 0 "$output_dir/initramfs.list" > "$output_dir/initramfs.cpio"
+gzip -n -9 -c "$output_dir/initramfs.cpio" > "$output_dir/initramfs.cpio.gz"
+
+for artifact in init initramfs.cpio initramfs.cpio.gz; do
+    stat -c '%n %s bytes' "$output_dir/$artifact"
+    sha256sum "$output_dir/$artifact"
+done
