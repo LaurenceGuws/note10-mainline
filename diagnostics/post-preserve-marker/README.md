@@ -137,6 +137,20 @@ has **not** been flashed or otherwise applied to the phone.
 The earlier offline candidate `138a314e...` is superseded and must not be
 flashed; it contains the review-rejected cyan marker range.
 
+## Review status
+
+Independent R1 follow-up review returned `FINAL ACCEPT` for maintained repo
+checkpoint `5c6bc875f22180b87f6f474d540418e6f6413378` and corrected BOOT
+`ac54bba79cf5e796a30b7cb2635e997f27bb0fe48a2120471c601859e3c7f4a6`.
+
+The verdict is recorded at:
+
+`~/.local/state/workstreams/note10-mainline/reviews/post-preserve-marker-review.md`
+
+The candidate is therefore ready for the next attended BOOT-only physical
+test, but remains unflashed. The phone continues to run rollback BOOT
+`1a78e511...`.
+
 ## Future physical interpretation
 
 When Captain is available for the attended BOOT-only test:

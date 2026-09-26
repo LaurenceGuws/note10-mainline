@@ -193,4 +193,6 @@ magenta marker, executes only the original `record_mmu_state` and
 before stack/idmap setup. Independent review caught and rejected an offline
 cyan-range construction error before any phone mutation; the corrected
 reproducible BOOT candidate is `ac54bba7...` and remains unflashed. Live BOOT
-is still the verified `1a78e511...` rollback.
+is still the verified `1a78e511...` rollback. R1 follow-up review returned
+`FINAL ACCEPT` for the corrected candidate, so the next action is only the
+attended BOOT-only split-stripe test when Captain is available.
