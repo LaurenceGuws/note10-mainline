@@ -330,3 +330,9 @@ printing and `setup_arch()` remain unreachable. See
 The exact BOOT
 `8dd7d4d2a160b1072f76c2d84ee30dce1bbaa8523fa53a4ecb72f9143f07d591`
 is promoted as the newest proven MAINLINE checkpoint and remains installed.
+
+The next offline candidate removes only the pure-green hold, lets the kernel
+banner print and safe arm64 `setup_arch()` work complete through
+`local_daif_restore()`, then paints rows 672..703 pure blue (`0xff0000ff`) and
+holds before **any** `cpu_uninstall_idmap()` / TTBR0-teardown preparation.
+See `diagnostics/setup-arch-pre-idmap-marker/README.md`.
