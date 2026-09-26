@@ -313,3 +313,9 @@ The exact BOOT
 `3992fcbfd834db4e63da7a6350f4a7d99a4002528e636ccc053faf3a63051c0e`
 is promoted as the newest proven MAINLINE checkpoint and remains installed.
 No Android rollback occurs after this PASS.
+
+The next offline candidate removes only the rose hold, lets the first ordinary
+`start_kernel` cluster execute through `boot_cpu_init()`, then paints rows
+672..703 pure green (`0xff00ff00`) and deliberately holds before banner
+printing or `setup_arch()`. See
+`diagnostics/start-kernel-ordinary-marker/README.md`.
