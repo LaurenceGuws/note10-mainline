@@ -9,7 +9,7 @@ Accepted parent kernel diagnostic commit:
 
 New kernel diagnostic commit:
 
-`85c070e369e9d6908c834a02f95378a9f8b4c834`
+`f7ee20f7687ff8b1851ad06e8c5ee449fb824ec4`
 
 Current proven MAINLINE checkpoint / routine rollback target:
 
@@ -116,19 +116,19 @@ Inline-asm clobbers:
 
 ```text
 x0, x1, x8,
-x9, x10, x11, x12, x13, x14,
+x10, x11, x12, x13, x14,
 cc, memory
 ```
 
 `x0/x1/x8` are compiler-only anti-hoist clobbers. The yellow marker does not
 modify them.
 
-The compiler-selected read-only input register for the returned bridge pointer
-in the frozen build is **x15**:
+The returned bridge pointer is explicitly bound to **x9** as the fixed
+read-only input register. x9 is therefore deliberately omitted from the
+clobber list:
 
 ```asm
 bl   early_memremap_prot
-mov  x15, x0
 cbnz x0, success
 
 null_hold:
@@ -136,14 +136,14 @@ null_hold:
     b null_hold
 
 success:
-    mov  x10, x15
+    mov  x9, x0
+    mov  x10, x9
     ...
 ```
 
-x15 is only read by the yellow asm and is not marker scratch or clobbered state.
-Destructive marker scratch is x10..x12 in the frozen binary. Final independent
-review must decide this exact compiler allocation against the plan wording that
-marker scratch remain within x9..x14; do not silently reinterpret it.
+x9 is read-only across the yellow asm. Destructive marker scratch is x10..x12
+in the frozen binary. The yellow marker therefore physically uses only
+x9..x12, satisfying the literal x9..x14 register-confinement contract.
 
 `x18` / SCS, `sp`, `x29`, `x30`, and live compiler-managed
 callee-saved state remain untouched by the yellow asm. The
@@ -160,7 +160,6 @@ blue marker + visibility
 
 argument preparation for exact PROT_NORMAL_NC bridge
 bl early_memremap_prot
-mov x15, x0
 cbnz x0, yellow
 
 NULL:
@@ -168,7 +167,8 @@ NULL:
     b NULL
 
 YELLOW:
-    mov x10, x15
+    mov x9, x0
+    mov x10, x9
     build 0xffffff00ffffff00
     end = returned_va + 0x2d000
 loop:
@@ -191,9 +191,10 @@ TLB/TCR/cpu-switch continuation
 Final linked addresses:
 
 - `setup_arch = ffff800082214950`;
-- `early_memremap_prot = ffff80008223f540`;
+- `early_memremap_prot = ffff80008223f53c`;
 - map call = `ffff800082214a58`;
-- NULL hold = `ffff800082214a64`;
+- NULL hold = `ffff800082214a60`;
+- x9 bridge binding = `ffff800082214a68`;
 - yellow begins = `ffff800082214a6c`;
 - yellow `dsb sy = ffff800082214a98`;
 - yellow hold = `ffff800082214a9c`;
@@ -211,9 +212,9 @@ Therefore both NULL and success paths keep every
 - patch:
   `kernel-post-idmap-evidence-bridge.patch`;
 - patch SHA-256:
-  `25dfb1aa5f06496eb298ba20630f828d5132ddb4a788e8335706c557c3e8e193`;
+  `b05ae02287359767fd315c2b90b486e8a9deae16b0b2f73899d8eb4e6b1aa875`;
 - stable patch-id:
-  `1f0ba61b6b562b15505f1f329849901532fe1137`;
+  `e764e54a35c632a92ab049ce936bd61d76912c13`;
 - patch applies cleanly to accepted parent;
 - `git diff --check`: pass;
 - strict checkpatch: 0 errors, 0 warnings, 0 checks;
@@ -221,7 +222,7 @@ Therefore both NULL and success paths keep every
 - config SHA-256:
   `314c3cea10b92a6078cf2eb2ede2fa11189d940d4d62bd810a280c446a287e37`;
 - Image SHA-256:
-  `98ea919f56a3d9f6a9a3f7538fd764079487b53d13e44f8809bdaec82b1438e0`;
+  `06698c3c0d7dd42be079698347653e9c414b36e17657675dcfaf75cf19264c64`;
 - Image size: `44,247,552` bytes;
 - arm64 Image header remains `text_offset=0`, `image_size=0x2b10000`,
   flags `0xa`, ARM64 magic;
@@ -235,7 +236,7 @@ Therefore both NULL and success paths keep every
 Two independent builds of the unchanged reviewed JUMP_READY loader source are
 byte-identical:
 
-`6e7502f6b76b19a8f4b971bdf7645565349f4f2a919d03a3bbc1f1e70085f269`
+`211a87b053d52690207f2edcd8964570cedb14b918bbc34f889c7dacb0700173`
 
 Loader size remains `44,838,912` bytes with exact embedded offsets:
 
@@ -245,11 +246,11 @@ Loader size remains `44,838,912` bytes with exact embedded offsets:
 
 Frozen diagnostic BOOT:
 
-`7fe1c115e9072e96cecf1561156bdf1809ea701de0350978edb8827213a84c3b`
+`ac321737aeeaa886bf6ca2e3fd4263a08a9880fcd3b9be7e216fdb1ad359977e`
 
 Workstream path:
 
-`~/.local/state/workstreams/note10-mainline/boot-candidate/post-idmap-evidence-bridge-a/candidate.img`
+`~/.local/state/workstreams/note10-mainline/boot-candidate/post-idmap-evidence-bridge-r1-a/candidate.img`
 
 Two complete packaging runs reproduce the candidate byte-for-byte.
 
@@ -287,7 +288,7 @@ Against that current proven MAINLINE parent:
   bridge creation and visible high-VA access are proven, but do not promote
   until held-state stability is resolved.
 
-On physical PASS, promote exact `7fe1c115...` as the new proven MAINLINE
+On physical PASS, promote exact `ac321737...` as the new proven MAINLINE
 checkpoint and leave it installed. On FAIL, restore current proven MAINLINE
 `6f7c807e...`, not Android recovery.
 

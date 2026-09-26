@@ -1,14 +1,14 @@
-From 85c070e369e9d6908c834a02f95378a9f8b4c834 Mon Sep 17 00:00:00 2001
+From f7ee20f7687ff8b1851ad06e8c5ee449fb824ec4 Mon Sep 17 00:00:00 2001
 From: Laurence <lggousie46@gmail.com>
 Date: Sat, 26 Sep 2026 17:48:59 +0200
 Subject: [PATCH] arm64: prove pre-idmap TTBR1 framebuffer bridge
 
 ---
- arch/arm64/kernel/setup.c | 45 ++++++++++++++++++++++++++++++++++-----
- 1 file changed, 40 insertions(+), 5 deletions(-)
+ arch/arm64/kernel/setup.c | 47 ++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 42 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index febf0793c..521e88a0c 100644
+index febf0793c..41964f9e5 100644
 --- a/arch/arm64/kernel/setup.c
 +++ b/arch/arm64/kernel/setup.c
 @@ -38,6 +38,7 @@
@@ -39,7 +39,7 @@ index febf0793c..521e88a0c 100644
  	 */
  	asm volatile("movz x9, #0xca3b, lsl #16\n\t"
  		"movk x9, #0x1000\n\t"
-@@ -347,14 +350,46 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
+@@ -347,14 +350,48 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
  		"b.lo 2b\n\t"
  		"dsb sy\n\t"
  		"isb\n\t"
@@ -59,6 +59,8 @@ index febf0793c..521e88a0c 100644
 +			     :
 +			     :
 +			     : "memory");
++
++	register unsigned long bridge_reg asm("x9") = (unsigned long)bridge;
 +
 +	/*
 +	 * The matching Normal-NC TTBR1 bridge is live. Repaint the same band
@@ -82,8 +84,8 @@ index febf0793c..521e88a0c 100644
 +		"wfe\n\t"
 +		"b 2b\n\t"
 +		:
-+		: "r" (bridge)
-+		: "x0", "x1", "x8", "x9", "x10", "x11", "x12", "x13",
++		: "r" (bridge_reg)
++		: "x0", "x1", "x8", "x10", "x11", "x12", "x13",
 +		  "x14", "cc", "memory");
 +
  	/*
