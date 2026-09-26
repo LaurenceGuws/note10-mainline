@@ -229,3 +229,13 @@ has been saved in `x20`, then overwrites those rows white only after
 `__cpu_setup` returns. The white path deliberately holds before
 `__primary_switch`, so MMU enable is unreachable. See
 `diagnostics/init-kernel-el-cpu-setup-marker/README.md`.
+
+The attended test produced the expected final white rows 640..671 and remained
+stable for at least three minutes. This physically proves `init_kernel_el` and
+`__cpu_setup` both returned, while `__primary_switch` and `__enable_mmu`
+remained unreachable. See
+`docs/2026-09-26-init-kernel-el-cpu-setup-proof.md`.
+
+The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
+with Android `sys.boot_completed=1`. The earned next boundary is now
+`__primary_switch` / `__enable_mmu` itself.
