@@ -175,3 +175,13 @@ test did **not** prove the final `br x4` into Linux. See
 
 The earned next problem is therefore the copy-to-`primary_entry` boundary, not
 another speculative UFS change.
+
+That boundary is now resolved. The reviewed two-sided marker candidate showed
+`COPY_DONE / JUMP_READY`, then painted and held a magenta stripe from the first
+body instructions of `primary_entry` for at least three minutes. Handoff state
+was EL1 with `SCTLR_EL1.M=0`, `C=0`, `I=0`; the loader target was exactly
+`0x90000000` and `x0=0x8ba476e0`.
+
+The exact `1a78e511...` BOOT was restored afterward and verified on-device.
+The next earned tranche is one bounded stage deeper in the original arm64
+entry path, not a loader/UFS/watchdog redesign.

@@ -132,3 +132,41 @@ The next attended BOOT has only four useful outcomes:
   ownership before moving deeper into Linux.
 
 No UFS result is expected from this intentionally held diagnostic kernel.
+
+## Physical result
+
+The reviewed candidate was tested on 2026-09-26 and produced the strongest
+outcome: both loader and kernel markers were visible, and the magenta
+`primary_entry` stripe remained unchanged for at least three minutes.
+
+Captain transcribed the loader-side handoff receipt as:
+
+```text
+target=0x0000000090000000
+x0=0x000000008ba476e0
+CurrentEL=EL1
+DAIF=0x00000000000002c0
+SCTLR=0x0000000030c5083a
+```
+
+Relevant decoded entry state:
+
+- `SCTLR_EL1.M=0`: MMU off;
+- `SCTLR_EL1.C=0`: data cache off;
+- `SCTLR_EL1.I=0`: instruction cache off;
+- `SCTLR_EL1.EE=0`: little-endian;
+- `DAIF.D=1`, `I=1`, `F=1`, `A=0`.
+
+This proves the Image and initramfs copies completed, the final `br x4`
+executed, and the first instructions of Linux `primary_entry` ran. The stable
+deliberate hold also proves there is no unavoidable immediate reset at the
+entry point under this inherited state.
+
+After observation, the exact rollback BOOT
+`1a78e5117cf23b3cab5547da2369018066c9ddac27307e97fce46026647ae2f9`
+was restored to `BOOT` only and re-hashed on-device. Android subsequently
+reached `sys.boot_completed=1` on the expected 4.14 kernel.
+
+The next diagnostic should therefore move the deliberate marker/hold one
+bounded stage deeper into the original arm64 entry path rather than changing
+the loader, UFS, DTB, initramfs or watchdog state.
