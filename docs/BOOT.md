@@ -281,3 +281,13 @@ for amber after `init_cpu_task`, blue after VBAR installation, and white after
 FDT/kimage/boot-mode/final-EL setup plus the original frame pop. The white path
 deliberately holds immediately before `start_kernel`. See
 `diagnostics/primary-switched-state-marker/README.md`.
+
+The attended test produced the expected final white marker and it remained
+stable for at least three minutes. This physically proves every remaining
+pre-`start_kernel` `__primary_switched` state operation completed while
+`start_kernel` itself remained unreachable. See
+`docs/2026-09-26-primary-switched-state-proof.md`.
+
+The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
+with Android `sys.boot_completed=1`. The earned next boundary is now
+`start_kernel` entry itself.
