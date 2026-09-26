@@ -247,3 +247,13 @@ page-table accounting is 7 of the existing 8 reserved pages. It brackets
 and deliberately holds after `__enable_mmu` returns, before
 `__pi_early_map_kernel`. DT `no-map` and normal framebuffer mappings remain
 unchanged. See `diagnostics/primary-switch-enable-mmu-marker/README.md`.
+
+The attended test produced the expected final orange band and remained stable
+for at least three minutes. This physically proves entry into
+`__primary_switch`, the TTBR setup, the complete MMU-enable macro, and a
+successful return from `__enable_mmu` with the MMU enabled. See
+`docs/2026-09-26-mmu-enable-proof.md`.
+
+The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
+with Android `sys.boot_completed=1`. The earned next boundary is now
+`__pi_early_map_kernel` / relocation.
