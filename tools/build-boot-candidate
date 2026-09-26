@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "usage: $0 BASE_BOOT MAGISKBOOT UNILOADER OUTPUT_DIR" >&2
+    exit 2
+}
+
+[[ $# -eq 4 ]] || usage
+
+base_boot="$(realpath "$1")"
+magiskboot="$(realpath "$2")"
+uniloader="$(realpath "$3")"
+output_dir="$(realpath -m "$4")"
+
+[[ -f "$base_boot" ]] || {
+    echo "missing base BOOT image: $base_boot" >&2
+    exit 1
+}
+[[ -x "$magiskboot" ]] || {
+    echo "missing executable magiskboot: $magiskboot" >&2
+    exit 1
+}
+[[ -f "$uniloader" ]] || {
+    echo "missing uniLoader payload: $uniloader" >&2
+    exit 1
+}
+
+if [[ -e "$output_dir" ]] && [[ -n "$(find "$output_dir" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+    echo "output directory is not empty: $output_dir" >&2
+    exit 1
+fi
+
+mkdir -p "$output_dir/work"
+cp --reflink=auto "$base_boot" "$output_dir/base.img"
+
+{
+    sha256sum "$base_boot"
+    sha256sum "$magiskboot"
+    sha256sum "$uniloader"
+} > "$output_dir/inputs.sha256"
+
+(
+    cd "$output_dir/work"
+    "$magiskboot" unpack "$output_dir/base.img"
+) > "$output_dir/unpack-base.stdout" 2> "$output_dir/unpack-base.stderr"
+
+[[ -f "$output_dir/work/kernel" ]] || {
+    echo "magiskboot did not produce a kernel component" >&2
+    exit 1
+}
+
+base_kernel_size="$(stat -c %s "$output_dir/work/kernel")"
+loader_size="$(stat -c %s "$uniloader")"
+if (( loader_size > base_kernel_size )); then
+    echo "uniLoader is larger than the base kernel slot" >&2
+    exit 1
+fi
+
+cp "$uniloader" "$output_dir/work/kernel"
+truncate -s "$base_kernel_size" "$output_dir/work/kernel"
+
+{
+    printf 'base_kernel_size=%s\n' "$base_kernel_size"
+    printf 'loader_size=%s\n' "$loader_size"
+    printf 'padding_size=%s\n' "$((base_kernel_size - loader_size))"
+} > "$output_dir/kernel-slot.txt"
+
+(
+    cd "$output_dir/work"
+    "$magiskboot" repack "$output_dir/base.img" "$output_dir/candidate.img"
+) > "$output_dir/repack.stdout" 2> "$output_dir/repack.stderr"
+
+python3 - "$output_dir/base.img" "$output_dir/candidate.img" "$uniloader" > "$output_dir/layout-verification.txt" <<'PY'
+from pathlib import Path
+import struct
+import sys
+
+base = Path(sys.argv[1]).read_bytes()
+candidate = Path(sys.argv[2]).read_bytes()
+loader = Path(sys.argv[3]).read_bytes()
+
+def fail(message):
+    raise SystemExit(message)
+
+def u32(blob, offset):
+    return struct.unpack_from("<I", blob, offset)[0]
+
+if base[:8] != b"ANDROID!" or candidate[:8] != b"ANDROID!":
+    fail("only Android BOOT images are supported")
+
+if len(candidate) != len(base):
+    fail(f"candidate size changed: {len(candidate)} != {len(base)}")
+
+base_kernel_size = u32(base, 8)
+candidate_kernel_size = u32(candidate, 8)
+base_ramdisk_size = u32(base, 16)
+candidate_ramdisk_size = u32(candidate, 16)
+page_size = u32(base, 36)
+candidate_page_size = u32(candidate, 36)
+header_version = u32(base, 40)
+candidate_header_version = u32(candidate, 40)
+
+if page_size == 0 or page_size != candidate_page_size:
+    fail("page size changed or is invalid")
+if header_version != 1 or candidate_header_version != 1:
+    fail(f"expected Android BOOT header v1, got {header_version}/{candidate_header_version}")
+if base_kernel_size != candidate_kernel_size:
+    fail("kernel field size changed")
+if base_ramdisk_size != candidate_ramdisk_size:
+    fail("ramdisk field size changed")
+if len(loader) > base_kernel_size:
+    fail("loader exceeds kernel field")
+
+align = lambda value: (value + page_size - 1) // page_size * page_size
+kernel_offset = page_size
+ramdisk_offset = kernel_offset + align(base_kernel_size)
+tail_offset = ramdisk_offset + align(base_ramdisk_size)
+
+slot = candidate[kernel_offset:kernel_offset + base_kernel_size]
+if slot[:len(loader)] != loader:
+    fail("candidate kernel prefix is not the exact uniLoader")
+if any(slot[len(loader):]):
+    fail("candidate kernel padding is not all zero")
+if base[ramdisk_offset:tail_offset] != candidate[ramdisk_offset:tail_offset]:
+    fail("ramdisk region changed")
+if base[tail_offset:] != candidate[tail_offset:]:
+    fail("post-ramdisk tail changed")
+
+header_diffs = [
+    offset
+    for offset, (old, new) in enumerate(zip(base[:page_size], candidate[:page_size]))
+    if old != new
+]
+if any(offset < 0x240 or offset >= 0x260 for offset in header_diffs):
+    fail(f"unexpected boot-header drift at offsets: {header_diffs}")
+
+print(f"image_size={len(candidate)}")
+print(f"page_size={page_size}")
+print(f"header_version={header_version}")
+print(f"kernel_size={base_kernel_size}")
+print(f"ramdisk_size={base_ramdisk_size}")
+print(f"loader_size={len(loader)}")
+print(f"padding_size={base_kernel_size - len(loader)}")
+print("loader_prefix_exact=yes")
+print("padding_all_zero=yes")
+print("ramdisk_region_identical=yes")
+print("post_ramdisk_tail_identical=yes")
+print("header_drift=checksum_id_only")
+PY
+
+{
+    sha256sum "$output_dir/base.img"
+    sha256sum "$output_dir/candidate.img"
+} > "$output_dir/images.sha256"
+
+cat "$output_dir/kernel-slot.txt"
+cat "$output_dir/layout-verification.txt"
+cat "$output_dir/images.sha256"

@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "usage: $0 UNILOADER_REPO KERNEL_IMAGE DTB INITRAMFS OUTPUT_DIR" >&2
+    exit 2
+}
+
+[[ $# -eq 5 ]] || usage
+
+uniloader_repo="$(realpath "$1")"
+kernel_image="$(realpath "$2")"
+dtb="$(realpath "$3")"
+initramfs="$(realpath "$4")"
+output_dir="$(realpath -m "$5")"
+
+expected_commit="f45d73b344ce9ae8dab191836933ebfbed287afb"
+version_tag="f45d73b"
+build_date="2026-09-24 04:45:35 UTC"
+
+[[ -d "$uniloader_repo/.git" ]] || {
+    echo "not a uniLoader Git checkout: $uniloader_repo" >&2
+    exit 1
+}
+
+for input in "$kernel_image" "$dtb" "$initramfs"; do
+    [[ -f "$input" ]] || {
+        echo "missing input: $input" >&2
+        exit 1
+    }
+done
+
+git -C "$uniloader_repo" cat-file -e "$expected_commit^{commit}"
+
+if [[ -e "$output_dir" ]] && [[ -n "$(find "$output_dir" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+    echo "output directory is not empty: $output_dir" >&2
+    exit 1
+fi
+
+mkdir -p "$output_dir"
+build_tree="$output_dir/.build-worktree"
+
+cleanup() {
+    if git -C "$uniloader_repo" worktree list --porcelain | grep -Fxq "worktree $build_tree"; then
+        git -C "$uniloader_repo" worktree remove --force "$build_tree" >/dev/null
+    fi
+}
+trap cleanup EXIT
+
+git -C "$uniloader_repo" worktree add --detach "$build_tree" "$expected_commit" >/dev/null
+
+{
+    printf 'commit=%s\n' "$expected_commit"
+    printf 'GIT_VERSION_TAG=%s\n' "$version_tag"
+    printf 'BUILD_DATE=%s\n' "$build_date"
+    clang --version | head -1
+    zig ld.lld --version
+    sha256sum "$kernel_image" "$dtb" "$initramfs"
+} > "$output_dir/inputs.txt"
+
+(
+    cd "$build_tree"
+    make ARCH=aarch64 LLVM=1 beyond1lte_defconfig
+    make -j"$(nproc)" \
+        ARCH=aarch64 \
+        LLVM=1 \
+        LD='zig ld.lld' \
+        GIT_VERSION_TAG="$version_tag" \
+        BUILD_DATE="$build_date" \
+        KERNEL_PATH="$kernel_image" \
+        DT_PATH="$dtb" \
+        RAMDISK_PATH="$initramfs"
+) > "$output_dir/build.stdout" 2> "$output_dir/build.stderr"
+
+cp "$build_tree/uniLoader" "$output_dir/uniLoader"
+cp "$build_tree/.config" "$output_dir/config"
+
+python3 - "$kernel_image" "$dtb" "$initramfs" "$output_dir/uniLoader" > "$output_dir/layout.txt" <<'PY'
+from pathlib import Path
+import sys
+
+loader = Path(sys.argv[4]).read_bytes()
+
+for label, path in (
+    ("Image", sys.argv[1]),
+    ("DTB", sys.argv[2]),
+    ("initramfs", sys.argv[3]),
+):
+    payload = Path(path).read_bytes()
+    offset = loader.find(payload)
+    if offset < 0:
+        raise SystemExit(f"{label} is not embedded exactly")
+    print(f"{label}_offset=0x{offset:x}")
+    print(f"{label}_size={len(payload)}")
+
+print(f"loader_size={len(loader)}")
+PY
+
+sha256sum "$output_dir/uniLoader" > "$output_dir/uniLoader.sha256"
+
+cat "$output_dir/layout.txt"
+cat "$output_dir/uniLoader.sha256"
