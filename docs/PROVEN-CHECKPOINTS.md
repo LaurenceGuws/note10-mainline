@@ -20,24 +20,24 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`3a66d98bcfa76de7f9f598eba839f5ccc4a096c4ca50f6cacd5e44fe87eb6d27`
+`213b61315c94e37f942532c6fdbe5f6dcd158a851dbe9177258036265d2ec803`
 
-It physically proves the complete accepted post-idmap / pre-paging phase:
-`cpu_uninstall_idmap()`, `xen_early_init()`, `efi_init()`, the original
-runtime-selected EFI warning/taint continuation, and
-`arm64_memblock_init()` all return while the established high-TTBR1
-framebuffer bridge remains visibly writable. The final pure-cyan
-`0xff00ffff` marker remained unchanged for at least three minutes.
-`paging_init()` remains unreachable behind the deliberate cyan hold. The
-checkpoint remains installed.
+It physically proves the complete accepted `paging_init()` phase:
+`map_mem()`, `memblock_allow_resize()`, `create_idmap()` and
+`declare_kernel_vmas()` all return, then `paging_init()` executes its genuine
+frame/SCS epilogue and returns normally to `setup_arch()`. The surviving
+ordinary `setup_arch` framebuffer bridge is then freshly rebound `x20 -> x9`
+and paints spring green `0xff00ff80`. That marker remained unchanged for at
+least three minutes. `earlyfb_console_init()` remains unreachable behind the
+deliberate spring-green hold. The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`21f25494c348ea886717128762a6e371e9428aff43c448f630fca359297e82de`
+`7b12062945c4f47b8eb85b90f72d9fd57fdda6c7bf6a458f861f793876cbc1b5`
 
-The previous checkpoint physically proves the original Xen / EFI /
-warning-taint continuation and ends at the violet hold immediately before
-`arm64_memblock_init()`.
+The previous checkpoint physically proves `memblock_allow_resize()` and
+`create_idmap()` return and ends at the electric-purple hold immediately
+before `declare_kernel_vmas()`.
 
 ### Android RECOVERY checkpoint
 

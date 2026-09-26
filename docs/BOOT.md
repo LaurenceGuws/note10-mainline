@@ -402,3 +402,55 @@ This closes the post-idmap / pre-paging phase. The next architectural boundary
 is `paging_init()`. It requires a new bounded phase plan/review before physical
 work crosses that call. See
 `docs/2026-09-26-post-idmap-pre-paging-proof.md`.
+
+The next accepted phase crossed `paging_init()` itself in three reviewed
+physical checkpoints while preserving the same high-TTBR1
+`PROT_NORMAL_NC` evidence bridge:
+
+1. Q1 removed only the cyan hold, published the existing bridge pointer through
+   the accepted diagnostic `__initdata` handoff, executed `map_mem()`
+   completely, then loaded that handoff after return and painted gold
+   (`0xffffb000`) before `memblock_allow_resize()`. Gold remained unchanged
+   for at least three minutes. Exact promoted BOOT:
+   `7c4cf029d91b2841e4705e06218d7780ed24a87ed69f39848568e46e0637e749`.
+2. Q2 removed only the gold hold, executed the original
+   `memblock_allow_resize()` and `create_idmap()`, freshly reloaded the bridge
+   after `create_idmap()` returned, painted electric purple (`0xffc000ff`),
+   and held before `declare_kernel_vmas()`. Electric purple remained unchanged
+   for at least three minutes. Exact promoted BOOT:
+   `7b12062945c4f47b8eb85b90f72d9fd57fdda6c7bf6a458f861f793876cbc1b5`.
+3. Q3 removed only the electric-purple hold, executed unchanged
+   `declare_kernel_vmas()`, let `paging_init()` restore its saved register,
+   frame and SCS state and execute a genuine `ret`, then resumed in
+   `setup_arch()`. The ordinary surviving bridge in callee-saved `x20` was
+   freshly rebound `x20 -> x9`, painted spring green (`0xff00ff80`), and held
+   before `earlyfb_console_init()`. Spring green remained unchanged for at
+   least three minutes. Exact promoted BOOT:
+   `213b61315c94e37f942532c6fdbe5f6dcd158a851dbe9177258036265d2ec803`.
+
+The final linked Q3 return boundary is:
+
+```text
+ffff80008221c9b4  bl declare_kernel_vmas
+ffff80008221c9b8  ldr x19, [sp, #0x10]
+ffff80008221c9bc  ldp x29, x30, [sp], #0x20
+ffff80008221c9c0  ldr x30, [x18, #-0x8]!
+ffff80008221c9c4  mov x9, #0x0
+ffff80008221c9c8  ret
+
+ffff800082214c18  bl paging_init
+ffff800082214c1c  mov x9, x20
+ffff800082214c20  spring-green marker begins
+ffff800082214c4c  dsb sy
+ffff800082214c50  wfe
+ffff800082214c54  b ffff800082214c50
+
+-- unreachable --
+
+ffff800082214c58  bl earlyfb_console_init
+```
+
+This closes the accepted `paging_init()` phase. The next architectural boundary
+is `earlyfb_console_init()`. It requires a new bounded phase plan/review before
+physical work crosses that call. See
+`docs/2026-09-26-paging-init-proof.md`.
