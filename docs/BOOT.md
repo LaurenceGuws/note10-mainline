@@ -257,3 +257,10 @@ successful return from `__enable_mmu` with the MMU enabled. See
 The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
 with Android `sys.boot_completed=1`. The earned next boundary is now
 `__pi_early_map_kernel` / relocation.
+
+The next offline candidate keeps the accepted transient framebuffer idmap and
+uses the same rows 672..703 for violet immediately before
+`__pi_early_map_kernel`, cyan immediately after it returns, and lime as the
+first body instructions of `__primary_switched`, where it deliberately holds.
+No internal early-map C instrumentation is added. See
+`diagnostics/early-map-relocation-marker/README.md`.
