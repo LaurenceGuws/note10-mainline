@@ -1,0 +1,32 @@
+From c70cfcf29ab35e30ddebfa455ce926355201101a Mon Sep 17 00:00:00 2001
+From: Laurence <lggousie46@gmail.com>
+Date: Sat, 26 Sep 2026 04:02:46 +0200
+Subject: [PATCH] arm64: fix post-preserve marker range
+
+---
+ arch/arm64/kernel/head.S | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index b7e742b79..84695cd48 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -125,6 +125,7 @@ SYM_CODE_START(primary_entry)
+ 	 * deliberately hold before early_init_stack/idmap setup. Preserve x19/x21.
+ 	 */
+ 	movz	x9, #0xca32, lsl #16		// framebuffer row 576
++	movk	x9, #0xa000
+ 	mov	x10, x9
+ 	movz	x11, #0xffff
+ 	movk	x11, #0xff00, lsl #16
+@@ -140,6 +141,7 @@ SYM_CODE_START(primary_entry)
+ 
+ 	raw_dcache_line_size x13, x14
+ 	movz	x10, #0xca32, lsl #16
++	movk	x10, #0xa000
+ 	sub	x14, x13, #1
+ 	bic	x10, x10, x14
+ .Lnote10_post_preserve_clean:
+-- 
+2.55.0
+

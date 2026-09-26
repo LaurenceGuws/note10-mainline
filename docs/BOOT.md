@@ -190,5 +190,7 @@ That next offline tranche is now frozen under
 `diagnostics/post-preserve-marker/`. It keeps the proven loader and first-body
 magenta marker, executes only the original `record_mmu_state` and
 `preserve_boot_args`, then paints the lower half cyan and deliberately holds
-before stack/idmap setup. The reproducible BOOT candidate is `138a314e...` and
-remains unflashed; live BOOT is still the verified `1a78e511...` rollback.
+before stack/idmap setup. Independent review caught and rejected an offline
+cyan-range construction error before any phone mutation; the corrected
+reproducible BOOT candidate is `ac54bba7...` and remains unflashed. Live BOOT
+is still the verified `1a78e511...` rollback.

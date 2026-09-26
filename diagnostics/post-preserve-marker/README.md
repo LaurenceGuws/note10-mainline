@@ -18,12 +18,30 @@ Post-preserve marker commit:
 
 `efb241e6c40183263002f9e4839864a5864b7c31`
 
+Address-only review correction:
+
+`c70cfcf29ab35e30ddebfa455ce926355201101a`
+
 Export:
 
 - `kernel-post-preserve-marker.patch`
 - SHA-256:
   `d31f5b8535d245b38898bc6c1dc7813930bae34b697840ea6643f25625a99356`
 - stable patch-id: `d9a8dfe2825361504d2d496d98d1dae249a55ec2`
+
+Follow-up export:
+
+- `kernel-post-preserve-marker-address-fix.patch`
+- SHA-256:
+  `d4ba882266985b0901e6672fbf859ef9825b60fd7424dd9efe5e902757e92d2f`
+- stable patch-id: `9d8266cefa62f0695fd66c7377909f7f16598ac2`
+
+Independent review caught that the first offline freeze constructed
+`0xca320000` for the cyan start instead of exact row 576 at `0xca32a000`.
+That candidate was rejected before any phone mutation. The follow-up commit
+adds only the missing low `0xa000` to the fill and cache-clean start address
+constructions; the diagnostic boundary and all other instructions are
+unchanged.
 
 The delta changes only `arch/arm64/kernel/head.S`:
 
@@ -67,7 +85,7 @@ config as the physically proven entry-marker candidate:
 - config SHA-256:
   `314c3cea10b92a6078cf2eb2ede2fa11189d940d4d62bd810a280c446a287e37`
 - Image SHA-256:
-  `8a76b2e8108fdf6a5bcb51968c4b31990f0d63be5b150ccab8e060d5af012bbc`
+  `8df98b50dbdcc315bde92e4b86c529b5d9af3b8988345a6c9aa8cae96e6da459`
 - Image size: `44,247,552` bytes
 - Image header remains `text_offset=0`, `image_size=0x2b10000`, flags `0xa`,
   ARM64 magic
@@ -83,7 +101,7 @@ The loader source remains the reviewed commit:
 Two independent builds embedding this new Image produced the same
 44,838,912-byte uniLoader:
 
-`a31761613b6f4512976ab5b180f0538b3922560dc167d23415da48b544a60d60`
+`1f7a19b71f3b77d536a5010e286ef2c77292a4364499d8ec6848e1e082e6e959`
 
 The payload offsets are unchanged:
 
@@ -99,11 +117,11 @@ Rollback/base BOOT:
 
 Post-preserve marker candidate:
 
-`138a314e5e3108f58d1b432cadd63e34c48cbad00e1b7fb8b26e5746cae0fd09`
+`ac54bba79cf5e796a30b7cb2635e997f27bb0fe48a2120471c601859e3c7f4a6`
 
 Workstream path:
 
-`~/.local/state/workstreams/note10-mainline/boot-candidate/post-preserve-marker-a/candidate.img`
+`~/.local/state/workstreams/note10-mainline/boot-candidate/post-preserve-marker-fixed-a/candidate.img`
 
 The BOOT package was independently reproduced byte-for-byte. It preserves the
 48,424,984-byte kernel slot, 3,586,072 bytes of zero padding, the exact Android
@@ -115,6 +133,9 @@ verify result.
 After freezing this candidate, the phone was read-only rechecked and still ran
 the exact `1a78...` BOOT with Android `sys.boot_completed=1`. This candidate
 has **not** been flashed or otherwise applied to the phone.
+
+The earlier offline candidate `138a314e...` is superseded and must not be
+flashed; it contains the review-rejected cyan marker range.
 
 ## Future physical interpretation
 
