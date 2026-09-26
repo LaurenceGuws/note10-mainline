@@ -160,3 +160,13 @@ Before an attended BOOT flash, an independent review must verify at least:
 The attended physical success gate is deliberately narrow: reach `/init` and
 obtain repeated successful read-only `/dev/sda`/GPT probes. Writable rootfs,
 touch, GPU and desktop bring-up remain later tranches.
+
+## First physical result
+
+The reviewed candidate was tested once on 2026-09-26. uniLoader reached
+`Booting kernel...`, then the phone reset before the diagnostic `/init` became
+visible. The exact `1a78e511...` BOOT was restored successfully and verified
+on-device afterward.
+
+See `docs/2026-09-26-first-mainline-boot.md`. The earned next problem is now
+kernel-entry/earliest-mainline evidence, not another speculative UFS change.
