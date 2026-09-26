@@ -264,3 +264,14 @@ uses the same rows 672..703 for violet immediately before
 first body instructions of `__primary_switched`, where it deliberately holds.
 No internal early-map C instrumentation is added. See
 `diagnostics/early-map-relocation-marker/README.md`.
+
+The attended test produced the expected final lime marker and it remained
+stable for at least three minutes. This physically proves
+`__pi_early_map_kernel` returned, the untouched final virtual branch succeeded,
+and the first `__primary_switched` body instructions executed under the final
+kernel mapping. See
+`docs/2026-09-26-early-map-relocation-proof.md`.
+
+The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
+with Android `sys.boot_completed=1`. The earned next boundary is now the early
+`__primary_switched` state setup, still before `start_kernel`.
