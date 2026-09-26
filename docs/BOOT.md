@@ -222,3 +222,10 @@ The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
 with Android `sys.boot_completed=1`. The earned next boundary is now
 `init_kernel_el` / `__cpu_setup`, still before `__primary_switch` and MMU
 enable.
+
+The next offline candidate now brackets those two calls directly. It paints
+rows 640..671 red only after `init_kernel_el` returns and its boot-mode result
+has been saved in `x20`, then overwrites those rows white only after
+`__cpu_setup` returns. The white path deliberately holds before
+`__primary_switch`, so MMU enable is unreachable. See
+`diagnostics/init-kernel-el-cpu-setup-marker/README.md`.
