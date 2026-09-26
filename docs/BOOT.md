@@ -205,3 +205,9 @@ The exact `1a78e511...` rollback BOOT was restored afterward and verified
 on-device with Android `sys.boot_completed=1`. The earned next boundary is now
 the early stack + init-idmap creation and its MMU-off page-table cache
 invalidation, still before `init_kernel_el`.
+
+That next offline candidate now brackets early stack/idmap construction and the
+observed MMU-off page-table cache invalidation with yellow/green breadcrumbs in
+rows 608..639, while preserving the already-proven magenta/cyan history. It
+holds before `init_kernel_el`. See
+`diagnostics/idmap-breadcrumb-marker/README.md`.
