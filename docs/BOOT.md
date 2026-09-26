@@ -211,3 +211,14 @@ observed MMU-off page-table cache invalidation with yellow/green breadcrumbs in
 rows 608..639, while preserving the already-proven magenta/cyan history. It
 holds before `init_kernel_el`. See
 `diagnostics/idmap-breadcrumb-marker/README.md`.
+
+The attended test produced the expected final green lower quarter and remained
+stable for at least three minutes. This physically proves early stack setup,
+`__pi_create_init_idmap`, the expected `x19=0` path, and the MMU-off page-table
+`dcache_inval_poc` return. See
+`docs/2026-09-26-idmap-invalidation-proof.md`.
+
+The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
+with Android `sys.boot_completed=1`. The earned next boundary is now
+`init_kernel_el` / `__cpu_setup`, still before `__primary_switch` and MMU
+enable.
