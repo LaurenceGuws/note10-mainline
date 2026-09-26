@@ -239,3 +239,11 @@ remained unreachable. See
 The exact `1a78e511...` rollback BOOT was restored afterward and re-verified
 with Android `sys.boot_completed=1`. The earned next boundary is now
 `__primary_switch` / `__enable_mmu` itself.
+
+The next offline candidate adds one diagnostic-only 2 MiB Normal-NC identity
+mapping for the framebuffer to the transient TTBR0 init idmap. Final linked
+page-table accounting is 7 of the existing 8 reserved pages. It brackets
+`__primary_switch` / `__enable_mmu` with blue/yellow/red/orange rows 672..703
+and deliberately holds after `__enable_mmu` returns, before
+`__pi_early_map_kernel`. DT `no-map` and normal framebuffer mappings remain
+unchanged. See `diagnostics/primary-switch-enable-mmu-marker/README.md`.
