@@ -1164,3 +1164,88 @@ Stable PURPLE proves:
 This closes the MPIDR-hash phase. The next bounded decision is the
 `boot_args[1..3]` warning tail followed by genuine `setup_arch()` return. See
 `docs/2026-09-27-mpidr-hash-proof.md`.
+
+The next accepted phase closed the final `setup_arch()` tail and genuine return
+with one post-return BLUE checkpoint in `start_kernel()`.
+
+Frozen loader handoff remained:
+
+```text
+x0 = DT pointer
+x1 = 0
+x2 = 0
+x3 = 0
+x4 = kernel entry
+br x4
+```
+
+Unchanged `preserve_boot_args` still stores those values exactly.
+
+The production `setup_arch()` final tail remained unchanged except that the
+preceding PURPLE hold was removed:
+
+```text
+load boot_args[1..3]
+branch to warning only if any is nonzero
+
+restore x20/x19
+restore x23
+restore x22/x21
+restore x29/x30 and SP
+restore x30 through x18/SCS
+zero call-used registers
+ret
+```
+
+The caller-side T1 seam is:
+
+```text
+ffff80008221059c  bl setup_arch
+
+# only reachable after genuine setup_arch ret
+ffff8000822105a0  adrp x8, boot_args
+ffff8000822105a8  ldr x9, [x8]
+ffff8000822105ac  cbnz x9, FAIL_PURPLE
+ffff8000822105b0  ldr x9, [x8, #0x8]
+ffff8000822105b4  cbnz x9, FAIL_PURPLE
+ffff8000822105b8  ldr x8, [x8, #0x10]
+ffff8000822105bc  cbz x8, BOOTARGS_OK
+
+ffff8000822105c0  wfe
+ffff8000822105c4  b ffff8000822105c0
+
+ffff8000822105c8  adrp x8, note10_paging_bridge page
+ffff8000822105cc  ldr x9, [x8, #0x808]
+ffff8000822105d0  cbnz x9, BRIDGE_OK
+
+ffff8000822105d4  wfe
+ffff8000822105d8  b ffff8000822105d4
+
+# complete post-return success only
+ffff8000822105dc  mov x10, x9
+ffff8000822105e0  mov x11, #0xff
+ffff8000822105e4  movk x11, #0xff00, lsl #16
+ffff8000822105e8  movk x11, #0xff, lsl #32
+ffff8000822105ec  movk x11, #0xff00, lsl #48
+ffff8000822105fc  str x11, [x10], #8
+ffff800082210608  dsb sy
+ffff80008221060c  wfe
+ffff800082210610  b ffff80008221060c
+
+-- unreachable --
+
+ffff800082210614  bl mm_core_init_early
+```
+
+Captain reported BLUE PASS under the accepted >=3-minute rule. Exact promoted
+BOOT:
+
+`80587eb6d08902cc1047652a49f33094cb9a757db0f578dc34c885d4384ee220`
+
+Stable BLUE proves the warning path was not taken, the genuine
+`setup_arch()` epilogue and `ret` completed, and control resumed in
+`start_kernel()`. It does not prove anything inside `mm_core_init_early()`.
+
+This closes `setup_arch()` completely. The next architectural boundary is
+`mm_core_init_early()`. See
+`docs/2026-09-27-setup-arch-return-proof.md`.

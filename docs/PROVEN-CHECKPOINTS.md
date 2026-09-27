@@ -20,42 +20,43 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`470198620f2cbd2544e029df8965bbe9581928cd3732225f75352caf62ae543e`
+`80587eb6d08902cc1047652a49f33094cb9a757db0f578dc34c885d4384ee220`
 
-It physically proves the complete `smp_build_mpidr_hash()` phase on the
-already-proven eight-CPU possible set. Production `smp_build_mpidr_hash()`
-remained instruction-equivalent to the proven YELLOW parent.
+It physically proves the complete final `setup_arch()` tail and genuine return
+to `start_kernel()`.
 
-The physically proven input maps are
-`0,1,2,3,4,5,0x100,0x101` with `num_possible_cpus() == 8`. Those inputs
-deterministically yield:
-- `mask = 0x107`;
-- `shift_aff = [0,5,12,28]`;
-- `bits = 4`;
-- `mpidr_hash_size() = 16`.
+The exact frozen AArch64 loader still hands the kernel
+`x0=DT, x1=0, x2=0, x3=0`, and unchanged `preserve_boot_args` stores those
+values into `boot_args[]`. The final production `setup_arch()` boot-argument
+tail and epilogue remained semantically equivalent to the proven PURPLE parent.
 
-After genuine hash-builder return, linked containment required every independent
-published field and possible-count value to match exactly. The source-level
-`mpidr_hash_size() == 16` check was optimized away as redundant once
-`mpidr_hash.bits == 4` is required, because the unchanged inline definition is
-exactly `1 << mpidr_hash.bits`.
+After the actual `setup_arch()` `ret` landed back in `start_kernel()`, the
+T1 containment re-read `boot_args[1..3]` and required all three to remain zero.
+Only then did it reload the published `note10_paging_bridge`, require non-NULL,
+and paint BLUE (technical marker `0xff0000ff`).
 
-Only complete success repainted the evidence bridge PURPLE (technical marker
-`0xff8000ff`). Captain reported PURPLE PASS under the accepted >=3-minute rule.
+Captain reported BLUE PASS under the accepted >=3-minute rule.
 
-The production large-hash warning predicate is therefore false for the proven
-state: `16 > 4 * 8` is false. The subsequent `boot_args[1..3]` warning tail did
-not execute and `setup_arch()` did not return.
+Stable BLUE therefore proves:
+- the production boot-argument tail executed;
+- saved x1=x2=x3 were zero;
+- the warning `_printk` path was not taken;
+- genuine `setup_arch()` frame/callee-saved/SCS restoration completed;
+- genuine `setup_arch()` `ret` completed;
+- control returned to `start_kernel()`;
+- the evidence bridge remained valid/writable after return;
+- `mm_core_init_early()` did not execute.
+
+This closes `setup_arch()` completely.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`5242447cfaa9fcda25358ac5aa08eabbda2d3fb59aef61195fcc8955348ede84`
+`470198620f2cbd2544e029df8965bbe9581928cd3732225f75352caf62ae543e`
 
-The previous checkpoint is SMP-init S2. It physically proves the exact
-eight-CPU logical maps, PSCI ops identity for CPUs 1-7, and their possible
-state, ending at YELLOW before `smp_build_mpidr_hash()`.
+The previous checkpoint is MPIDR-hash H1. It proves the exact published hash and
+ends at PURPLE before the final boot-argument tail and genuine return.
 
 ### Android RECOVERY checkpoint
 
