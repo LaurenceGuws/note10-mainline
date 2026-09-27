@@ -20,55 +20,51 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`c3e565842d2af6eab7e55de6b79f93d6e247196a2119553b0def3d644d8abef2`
+`6f2fa130f3ae71a3631e93272188e3b4c057e0e8ff2cbbc9c1b156f2b6f70bcf`
 
-It physically proves complete `mm_core_init_early()` through genuine return to
-`start_kernel()`.
+It physically proves the second linked `start_kernel()` `jump_label_init()`
+invocation through its genuine return.
 
-The phase used two independently reviewed checkpoints.
+The exact image state begins with `static_key_initialized == 0`. The first
+linked `jump_label_init()` call is inside the already physically proven
+`setup_arch()` path. Under selected `CONFIG_JUMP_LABEL=y`, unchanged production
+code has one true writer and no selected clear writer. Complete `setup_arch()`
+return therefore establishes `static_key_initialized == true` before the second
+call.
 
-MM1 ORANGE first crossed only the bounded HugeTLB prelude. Exact promoted-T1
-bytes proved `hugetlb_cma_size == 0`, `hugetlb_param_index == 0` and
-`hugetlb_max_hstate == 0`. With fixed bootargs containing no HugeTLB/CMA
-parameters, unchanged `hugetlb_cma_reserve()` took its immediate zero-size
-return and unchanged `hugetlb_bootmem_alloc()` completed bounded node/list
-bookkeeping with zero queued parameter callbacks and zero hstate-allocation
-iterations. Captain reported ORANGE PASS under the accepted >=3-minute rule.
+J1 leaves the 86-instruction production `jump_label_init()` unchanged. The
+second call must therefore take its initialized `tbnz` fast-return path, skipping
+the false-only locking, sorting, jump-table rewrite, initialization store and
+unlock sequence while still executing the real common epilogue and `ret`.
 
-MM2 then removed only the ORANGE hold and executed unchanged `free_area_init()`.
-The whole 259-instruction function and six core direct helpers remained
-production-equivalent to MM1. `free_area_init()` has no source-level early
-return and exactly one normal linked `ret`.
+After genuine return the caller reloads the static-key byte as corroboration,
+then freshly loads the Note10 framebuffer bridge and paints GREEN
+(`0xff00ff00`). Captain reported GREEN PASS under the accepted >=3-minute rule.
 
-After that real return, `mm_core_init_early()` restored its frame and x18/SCS
-return state and genuinely returned to `start_kernel()`. Only then did the
-caller freshly load the published Note10 bridge pointer and paint WHITE
-(technical marker `0xffffffff`). Captain reported WHITE PASS under the accepted
->=3-minute rule.
-
-Stable WHITE therefore proves:
-- all MM1 ORANGE facts remain true;
-- unchanged `free_area_init()` reached its sole normal function end;
-- the sparsemem/NUMA/zone/node/memmap tranche completed sufficiently for
-  production to return;
-- genuine `mm_core_init_early()` frame/SCS restoration completed;
-- genuine `mm_core_init_early()` `ret` completed;
+Stable GREEN proves:
+- all physically proven MM2 WHITE facts remain true;
+- the second linked `jump_label_init()` executed;
+- its entry pre-state was initialized/true;
+- unchanged production semantics forced the initialized fast-return branch;
+- the false-only initialization path was skipped;
+- the common frame/callee-saved/x18-SCS restoration and genuine `ret` completed;
 - control returned to `start_kernel()`;
-- the bridge pointer was freshly loaded after return and remained writable;
-- the next linked `start_kernel()` call to `jump_label_init()` did not execute.
+- `static_key_initialized` remained true after return;
+- the bridge was freshly loaded after return and remained writable;
+- `early_security_init()` did not execute.
 
-It does not prove `memblock_free_all()`, `mem_init()`, slab readiness or
-`mm_core_init()`. It also does not claim `jump_label_init()` never ran earlier:
-an earlier invocation is already part of the proven `setup_arch()` path.
+The post-return true check is corroboration only, not the fast-path
+discriminator. J1 makes no claim that `early_security_init()` or any LSM ran.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`5544ef05cac188ce6f8a96db5d06534b37618275bd6d07c7b416adf60e5497f1`
+`c3e565842d2af6eab7e55de6b79f93d6e247196a2119553b0def3d644d8abef2`
 
-The previous checkpoint is MM1 ORANGE. It physically proves the bounded HugeTLB
-prelude and stops immediately before `free_area_init()`.
+The previous checkpoint is MM2 WHITE. It physically proves complete
+`mm_core_init_early()` through genuine return to `start_kernel()` and stops
+before the second linked `jump_label_init()` call.
 
 ### Android RECOVERY checkpoint
 

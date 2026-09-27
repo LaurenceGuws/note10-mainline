@@ -1353,3 +1353,49 @@ The next linked `start_kernel()` boundary is its call to
 `jump_label_init()` invocation already proven inside `setup_arch()`.
 
 See `docs/2026-09-27-mm-core-init-early-proof.md`.
+
+## Second start_kernel jump_label_init: J1 GREEN
+
+The next linked `start_kernel()` call after MM2 is a second
+`jump_label_init()` invocation, not first-time global initialization.
+
+Exact linked J1 has two direct call sites:
+
+```text
+ffff800082214ac0  bl jump_label_init   # setup_arch
+ffff800082210650  bl jump_label_init   # start_kernel
+```
+
+The exact image byte for `static_key_initialized` starts at zero. The selected
+`CONFIG_JUMP_LABEL=y` production path has one true writer and no clear writer.
+Because complete `setup_arch()` return is already physically proven, its first
+`jump_label_init()` call necessarily completed initialization before the second
+call is reached.
+
+The unchanged 86-instruction production function begins its decision with:
+
+```text
+ffff8000822311d0  ldrb w8, [x20, #0xb84]
+ffff8000822311d4  tbnz w8, #0, ffff8000822312c0
+```
+
+The true pre-state therefore forces the second invocation directly to the common
+epilogue. The false-only lock/sort/rewrite/store/unlock sequence cannot execute.
+
+After genuine return, J1 reloads `static_key_initialized` as corroboration, then
+freshly loads `note10_paging_bridge`. Only successful corroboration plus a
+non-NULL bridge can paint GREEN (`0xff00ff00`), issue `dsb sy` and enter the
+infinite hold.
+
+The linked `early_security_init()` call lies after that hold. No linked
+`static_call_init()` call exists in between.
+
+Captain reported GREEN PASS under the accepted >=3-minute rule. Exact promoted
+BOOT:
+
+`6f2fa130f3ae71a3631e93272188e3b4c057e0e8ff2cbbc9c1b156f2b6f70bcf`
+
+This closes the second `jump_label_init()` boundary. It does not prove
+`early_security_init()` or any LSM ran.
+
+See `docs/2026-09-27-second-jump-label-proof.md`.
