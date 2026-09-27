@@ -20,28 +20,26 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`10eb19209719a38b677e01f5dc5afa89b14839312b2d8eae7d295f344f0068cc`
+`8fa7d749e6aefc84f28465056488914111ffef38f27c683ce0fc17a1ecf13cd4`
 
-It physically proves the corrected pre-slab earlyfb phase. The previously
-proven E1 path enters `earlyfb_console_init()` and returns from the unchanged
-watchdog helper path while the established high-TTBR1 framebuffer bridge
-remains visibly writable. E2D then preserves the original `earlyfb_map` check,
-observes that normal slab/vmap-backed ioremap infrastructure is not available
-at this `setup_arch()` call, defers before the full framebuffer
-`ioremap_wc()` path, executes the genuine `earlyfb_console_init()`
-frame/SCS epilogue and returns normally to `setup_arch()`. The surviving
-ordinary bridge is freshly rebound `x20 -> x9` and paints teal
-`0xff00c0c0`. That marker remained unchanged for at least three minutes.
-`acpi_table_upgrade()` remains unreachable behind the deliberate teal hold.
-The checkpoint remains installed.
+It physically proves the complete accepted ACPI / DT-selection phase.
+`acpi_table_upgrade()` returns on the exact frozen loader/initrd inputs,
+`acpi_boot_table_init()` returns with runtime `acpi_disabled == 1` on the
+already-parsed bootargs plus exact non-stub d2s DTB, and the expected DT branch
+executes unchanged `unflatten_device_tree()` through its live OF-tree
+allocation/population tranche and returns. The surviving ordinary
+`setup_arch()` bridge remains visibly writable throughout. The final GREEN
+marker `0xff80ff40` remained unchanged for at least three minutes immediately
+before `bootmem_init()`. The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`fcf1a6b751f49c5ef675cb883859feebacdb73ed03e059076815b47d129ba050`
+`cd180839ae4f0db71d3a250058a5e7347413385e26a21d3c78080fb9fe34d6a0`
 
-The previous checkpoint is E1. It physically proves the selected early
-watchdog-helper call returns and the existing bridge remains writable, ending
-at the amber `0xffffa000` hold before the `earlyfb_map` decision.
+The previous checkpoint is A2. It physically proves unchanged
+`acpi_boot_table_init()` returns with runtime `acpi_disabled == 1` on the
+expected DT-selected lane, ending at the BLUE hold before
+`unflatten_device_tree()`.
 
 ### Android RECOVERY checkpoint
 

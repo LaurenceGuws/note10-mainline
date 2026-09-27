@@ -525,3 +525,61 @@ after complete `mm_core_init()` has returned.
 The next immediate `setup_arch()` architectural boundary is
 `acpi_table_upgrade()`. Crossing it requires a new bounded phase plan/review.
 See `docs/2026-09-27-pre-slab-earlyfb-proof.md`.
+
+The next accepted phase crossed the ACPI / DT-selection tranche in three
+reviewed physical checkpoints while preserving the same ordinary setup_arch
+bridge.
+
+1. A1 removed only the teal hold, executed unchanged
+   `acpi_table_upgrade()`, freshly rebound the surviving bridge and painted
+   RED (technical marker `0xffff4040`) before `acpi_boot_table_init()`.
+   RED remained unchanged for at least three minutes. Exact promoted BOOT:
+   `e26a0fb30a652b51967bc978b32d0e3cb72f4911e4514852ed01ab78e2e55296`.
+   The exact loader-passed Linux initrd is a 7,696-byte gzip with no preceding
+   uncompressed newc archive and no ACPI override payload, so no early ACPI
+   table override can be installed from this frozen input.
+2. A2 removed only the RED hold, executed unchanged
+   `acpi_boot_table_init()`, then inspected runtime `acpi_disabled`. The
+   accepted exact bootargs had already been parsed inside arm64
+   `setup_arch()`, contain no `acpi=` option, and use an explicit non-empty
+   `earlycon=`. The exact d2s DTB has 26 root children with `aliases` first,
+   making `dt_is_stub()` false. Unexpected `acpi_disabled == 0` was contained
+   in an infinite RED-preserving hold before both DT unflatten and bootmem.
+   The expected `acpi_disabled == 1` path painted BLUE (technical marker
+   `0xff40c0ff`). BLUE remained unchanged for at least three minutes. Exact
+   promoted BOOT:
+   `cd180839ae4f0db71d3a250058a5e7347413385e26a21d3c78080fb9fe34d6a0`.
+3. A3 removed only the BLUE hold, retained the unexpected-ACPI containment,
+   entered the explicitly braced expected DT branch, executed unchanged
+   `unflatten_device_tree()`, and only after that call returned freshly
+   rebound the bridge and painted GREEN (technical marker `0xff80ff40`).
+   GREEN remained unchanged for at least three minutes. Exact promoted BOOT:
+   `8fa7d749e6aefc84f28465056488914111ffef38f27c683ce0fc17a1ecf13cd4`.
+
+The final linked A3 boundary is:
+
+```text
+ffff800082214cd8  ldr w8, [x20, #0xeec]
+ffff800082214cdc  cbz w8, ffff800082214d20
+
+-- expected acpi_disabled == 1 DT branch --
+
+ffff800082214ce0  bl unflatten_device_tree
+ffff800082214ce4  mov x9, x19
+ffff800082214cec  green marker begins
+ffff800082214d14  dsb sy
+ffff800082214d18  wfe
+ffff800082214d1c  b ffff800082214d18
+
+-- unreachable --
+
+ffff800082214d20  bl bootmem_init
+```
+
+This closes the accepted ACPI / DT-selection phase. The next architectural
+boundary is `bootmem_init()`. It begins the larger memory-init tranche including
+PFN setup, early memory test, NUMA initialization, KVM reservation, DMA-limit
+setup, CMA/crashkernel reservation and related memblock transitions.
+
+Do not cross `bootmem_init()` without a new bounded phase plan/review. See
+`docs/2026-09-27-acpi-dt-selection-proof.md`.
