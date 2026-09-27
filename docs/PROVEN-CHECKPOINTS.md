@@ -20,26 +20,28 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`8fa7d749e6aefc84f28465056488914111ffef38f27c683ce0fc17a1ecf13cd4`
+`b2799d78e4d90e670dd291922d458ea9827ccad86cd93df5d6416a7c591d18b4`
 
-It physically proves the complete accepted ACPI / DT-selection phase.
-`acpi_table_upgrade()` returns on the exact frozen loader/initrd inputs,
-`acpi_boot_table_init()` returns with runtime `acpi_disabled == 1` on the
-already-parsed bootargs plus exact non-stub d2s DTB, and the expected DT branch
-executes unchanged `unflatten_device_tree()` through its live OF-tree
-allocation/population tranche and returns. The surviving ordinary
-`setup_arch()` bridge remains visibly writable throughout. The final GREEN
-marker `0xff80ff40` remained unchanged for at least three minutes immediately
-before `bootmem_init()`. The checkpoint remains installed.
+It physically proves the complete accepted `bootmem_init()` phase. The
+previously proven M1/M2 containment remains active, unchanged
+`dma_contiguous_reserve()`, `arch_reserve_crashkernel()` and
+`memblock_dump_all()` all return, and `bootmem_init()` executes its genuine
+frame/callee-saved/SCS restoration and `ret` back to `setup_arch()`. The
+surviving ordinary setup bridge is then freshly rebound `x19 -> x9` and paints
+WHITE (technical marker `0xffffffff`) over the established exact `0x2d000`
+evidence bridge. Captain reported PASS under the accepted WHITE >=3-minute
+physical rule. `CONFIG_KASAN` is off, so the next meaningful linked operation,
+`request_standard_resources()`, remains unreachable behind the WHITE hold.
+The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`cd180839ae4f0db71d3a250058a5e7347413385e26a21d3c78080fb9fe34d6a0`
+`653d937868e1abcac2c41b5b59133e569b42dc5ed5a3abb215da11441e22dead`
 
-The previous checkpoint is A2. It physically proves unchanged
-`acpi_boot_table_init()` returns with runtime `acpi_disabled == 1` on the
-expected DT-selected lane, ending at the BLUE hold before
-`unflatten_device_tree()`.
+The previous checkpoint is M2. It physically proves unchanged
+`kvm_hyp_reserve()` and `dma_limits_init()` returned and runtime
+`arm64_dma_phys_limit == 0x100000000`, ending at the PURPLE hold before
+`dma_contiguous_reserve()`.
 
 ### Android RECOVERY checkpoint
 

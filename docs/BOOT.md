@@ -583,3 +583,74 @@ setup, CMA/crashkernel reservation and related memblock transitions.
 
 Do not cross `bootmem_init()` without a new bounded phase plan/review. See
 `docs/2026-09-27-acpi-dt-selection-proof.md`.
+
+The next accepted phase crossed `bootmem_init()` in three reviewed physical
+checkpoints.
+
+1. M1 removed only the A3 GREEN hold and entered unchanged `bootmem_init()`.
+   The exact bootargs contain no `memtest=`, so unchanged `early_memtest()`
+   returned immediately. PFN globals were published, unchanged
+   `arch_numa_init()` ran, and the exact DT with no `numa-node-id` forced the
+   accepted dummy single-node fallback. Unexpected post-NUMA
+   `numa_off == false` preserved GREEN and self-held. Expected
+   `numa_off == true` freshly reloaded `note10_paging_bridge`, painted YELLOW
+   (technical marker `0xffffff00`), and held before `kvm_hyp_reserve()`.
+   YELLOW remained stable for at least three minutes. Exact promoted BOOT:
+   `83104b850e38706cd03e36d7c4b3c2d535111f63e019a79489c0deff7999fd88`.
+2. M2 removed only the YELLOW hold, preserved the NUMA containment, then
+   executed unchanged `kvm_hyp_reserve()` and `dma_limits_init()`. Exact
+   bootargs contain no `kvm-arm.mode=`, so protected-KVM reservation is not
+   selected. With ACPI physically proven disabled, no compiled `dma-ranges`,
+   and exact DRAM spanning `0x80000000..0xb00000000`, the expected runtime DMA
+   limit is exactly `0x100000000`. Any mismatch preserved YELLOW and self-held.
+   The exact 4 GiB path freshly reloaded the bridge, painted PURPLE (technical
+   marker `0xffff00ff`), and held before `dma_contiguous_reserve()`. PURPLE
+   remained stable for at least three minutes. Exact promoted BOOT:
+   `653d937868e1abcac2c41b5b59133e569b42dc5ed5a3abb215da11441e22dead`.
+3. M3 removed only the PURPLE hold and preserved both earlier containment
+   checks. It executed unchanged `dma_contiguous_reserve()`,
+   `arch_reserve_crashkernel()` and `memblock_dump_all()`, then completed the
+   genuine `bootmem_init()` frame/callee-saved/SCS restore and `ret`.
+   `setup_arch()` freshly rebound its surviving bridge `x19 -> x9` and painted
+   WHITE (technical marker `0xffffffff`). Captain reported PASS under the
+   accepted WHITE >=3-minute rule. Exact promoted BOOT:
+   `b2799d78e4d90e670dd291922d458ea9827ccad86cd93df5d6416a7c591d18b4`.
+
+The exact M3 linked return boundary is:
+
+```text
+ffff80008221bcf0  bl dma_contiguous_reserve
+ffff80008221bcf4  bl arch_reserve_crashkernel
+ffff80008221bcf8  bl memblock_dump_all
+ffff80008221bcfc  ldp x20, x19, [sp, #0x20]
+ffff80008221bd00  ldr x21, [sp, #0x10]
+ffff80008221bd04  ldp x29, x30, [sp], #0x30
+ffff80008221bd08  ldr x30, [x18, #-0x8]!
+ffff80008221bd20  ret
+
+ffff800082214d18  bl bootmem_init
+ffff800082214d1c  mov x9, x19
+ffff800082214d24  mov x11, #-1
+ffff800082214d34  str x11, [x10], #8
+ffff800082214d40  dsb sy
+ffff800082214d44  wfe
+ffff800082214d48  b ffff800082214d44
+
+-- unreachable --
+
+ffff800082214d4c  bl request_standard_resources
+```
+
+M3 deliberately does not claim successful generic CMA allocation. The exact
+configuration selects a 32 MiB generic CMA attempt, but WHITE proves only that
+the unchanged call returned. Exact bootargs contain no `crashkernel=`, so no
+crashkernel reservation is requested, and no `memblock=debug`, so the memblock
+dump remains disabled.
+
+`CONFIG_KASAN` is not set, so there is no meaningful linked KASAN runtime
+tranche between `bootmem_init()` return and `request_standard_resources()`.
+
+This closes the accepted `bootmem_init()` phase. The next architectural boundary
+is `request_standard_resources()`. It requires a new bounded phase plan/review
+before physical work crosses that call. See
+`docs/2026-09-27-bootmem-init-proof.md`.
