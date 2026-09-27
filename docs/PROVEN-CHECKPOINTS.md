@@ -20,44 +20,46 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`d9c62bb19c49932752fae10644f76f4166ed4ee8e9f2fc627e1690432ebe6194`
+`0ecf7d177732160dca0d8e74d20074678510b8259db2fedb62558e6e773a7766`
 
-It physically proves the complete `request_standard_resources()` phase.
-Physically proven R1 established entry through the two fixed kernel code/data
-`insert_resource()` calls, capture of `memblock.memory.cnt`, exact
-`cnt * 64` backing-size calculation, and successful non-NULL return from
-unchanged `memblock_alloc_or_panic()`. Physically proven R2 then ran the
-unchanged `for_each_mem_region` loop to completion, executed every reached
-descriptor path and per-region `insert_resource()` call, and completed the
-genuine `request_standard_resources()` frame/callee-saved/SCS restoration and
-`ret` back to `setup_arch()`. The surviving ordinary setup bridge was freshly
-rebound `x19 -> x9` and painted PINK (technical marker `0xffff40c0`) over the
-exact `0x2d000` evidence bridge. Captain reported PASS under the accepted
-PINK >=3-minute physical rule. The source-level `early_ioremap_reset()` call
-remains unreachable from the physical checkpoint, but on this exact arm64 build
-that helper links to a bare `ret`: both early and late fixmap hooks resolve to
-the same `__set_fixmap()` implementation, so the `after_paging_init` assignment
-is optimized away. The next meaningful linked runtime boundary is the already
-proven `acpi_disabled == 1` selection into `psci_dt_init()`.
-No successful resource-tree insertion result is claimed because production
-ignores every `insert_resource()` return value.
+It physically proves the complete PSCI DT initialization phase on the exact
+Exynos9825 DT lane. P1 crossed the already-proven `acpi_disabled == 1` branch,
+the linked no-op `early_ioremap_reset()`, PSCI DT node discovery and
+availability checks, then runtime-confirmed that the selected typed init
+function was exactly `psci_0_2_init`. BLUE (technical marker `0xff0000ff`)
+remained stable for at least three minutes while the indirect init call and
+therefore all PSCI firmware HVCs remained unreachable.
 
-This phase proceeded under a recorded Captain process exception after the
-phase-plan review prompt was accidentally sent back to the worker. The worker's
-`resources-phase-review.md` is self-review analysis only and is not independent
-authority. Both R1 and R2 frozen candidates still received independent
-candidate reviews before physical flashing.
+P2 then removed only the BLUE hold. The production `psci_0_2_init`,
+`get_set_conduit_method`, `psci_probe` and HVC helper bodies remained
+instruction-equivalent to P1. Exact DT method `"hvc"` selected the HVC
+conduit. The original indirect init call completed, `of_node_put()` executed,
+and `psci_dt_init()` completed its genuine frame/callee-saved/SCS restoration
+and `ret`. `setup_arch()` accepted only return value 0, freshly rebound its
+surviving bridge `x19 -> x9`, and painted GREEN (technical marker
+`0xff00ff00`) over the exact `0x2d000` evidence bridge. Captain reported PASS
+under the accepted GREEN >=3-minute physical rule. `arm64_rsi_init()` remains
+unreachable.
+
+The proof intentionally does not claim an exact PSCI firmware version, blanket
+optional-feature support, or success of ignored-return operations beyond what
+the production overall return semantics guarantee.
+
+A reviewer also recorded one non-blocking source-comment issue: the inherited
+`setup_arch()` PINK comment still says it will hold before
+`early_ioremap_reset()` although the executable hold was removed in P1. The
+frozen executable behavior and linked proof are correct.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`fdc01a90fc95d24969370b6aeed33fca7ce6b1808c11cf60ab2f7e89877707d3`
+`d74989d89b72e6e29acd6130cb64d7d9557316f24a10e94da3e64d1cd74fbadc`
 
-The previous checkpoint is R1. It physically proves both fixed kernel code/data
-`insert_resource()` calls returned and unchanged `memblock_alloc_or_panic()`
-returned a non-NULL backing pointer, ending at the ORANGE hold before the
-memory-region loop. It does not prove either resource insertion succeeded.
+The previous checkpoint is PSCI P1. It physically proves a non-NULL,
+available PSCI DT node whose runtime selected typed init function equals
+`psci_0_2_init`, ending at the BLUE hold before the indirect init call and
+before any PSCI firmware HVC.
 
 ### Android RECOVERY checkpoint
 

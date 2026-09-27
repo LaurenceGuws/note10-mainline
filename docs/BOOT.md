@@ -742,3 +742,82 @@ The next meaningful linked runtime boundary is therefore the already-proven
 `acpi_disabled == 1` selection into `psci_dt_init()`. Crossing that PSCI DT
 initialization requires a new bounded phase plan/review. See
 `docs/2026-09-27-request-standard-resources-proof.md`.
+
+The next accepted phase crossed PSCI DT initialization in two independently
+reviewed physical checkpoints.
+
+The exact Exynos9825 DT uses:
+
+```text
+psci {
+    compatible = "arm,psci-0.2";
+    method = "hvc";
+};
+```
+
+1. P1 removed only the proven PINK hold. The source-level
+   `early_ioremap_reset()` call executed, but exact object/final linked code is
+   only a bare `ret` on this arm64 build, so no runtime state transition is
+   claimed there. The already-proven `acpi_disabled == 1` lane entered
+   `psci_dt_init()`, completed unchanged PSCI node discovery and availability
+   checks, assigned the selected match data to typed `psci_initcall_t init_fn`,
+   and runtime-contained any `init_fn != psci_0_2_init` by preserving PINK and
+   self-holding. Exact `psci_0_2_init` selection freshly reloaded the canonical
+   bridge and painted BLUE (technical marker `0xff0000ff`) before the indirect
+   init call. BLUE remained stable for at least three minutes. Exact promoted
+   BOOT:
+   `d74989d89b72e6e29acd6130cb64d7d9557316f24a10e94da3e64d1cd74fbadc`.
+2. P2 removed only the BLUE hold. The production `psci_0_2_init`,
+   `get_set_conduit_method`, `psci_probe` and `__invoke_psci_fn_hvc` bodies
+   remained unchanged. Exact DT method `"hvc"` selected the HVC conduit and the
+   production PSCI probe path ran. The original `psci_dt_init()` tail from the
+   indirect init call through `of_node_put()`, frame/callee-saved/SCS restore
+   and genuine `ret` remained equivalent to P1 across 25 normalized lines.
+   Back in `setup_arch()`, nonzero return preserved BLUE and self-held; only
+   return 0 freshly rebound the surviving bridge `x19 -> x9` and painted GREEN
+   (technical marker `0xff00ff00`). GREEN remained stable under the accepted
+   >=3-minute rule. Exact promoted BOOT:
+   `0ecf7d177732160dca0d8e74d20074678510b8259db2fedb62558e6e773a7766`.
+
+The final linked P2 boundary is:
+
+```text
+ffff8000822a2198  mov x0, x19
+ffff8000822a219c  blr x15
+ffff8000822a21a0  mov w20, w0
+ffff8000822a21ac  mov x0, x19
+ffff8000822a21b0  bl of_node_put
+ffff8000822a21c8  mov w0, w20
+ffff8000822a21cc  ldp x20, x19, [sp, #0x20]
+ffff8000822a21d0  ldp x29, x30, [sp, #0x10]
+ffff8000822a21d8  ldr x30, [x18, #-0x8]!
+ffff8000822a21f0  ret
+
+ffff800082214d90  bl psci_dt_init
+ffff800082214d94  cbz w0, ffff800082214da0
+ffff800082214d98  wfe
+ffff800082214d9c  b ffff800082214d98
+
+ffff800082214da0  mov x9, x19
+ffff800082214da8  mov x11, #0xff00
+ffff800082214dac  movk x11, #0xff00, lsl #16
+ffff800082214db0  movk x11, #0xff00, lsl #32
+ffff800082214db4  movk x11, #0xff00, lsl #48
+ffff800082214dc4  str x11, [x10], #8
+ffff800082214dd0  dsb sy
+ffff800082214dd4  wfe
+ffff800082214dd8  b ffff800082214dd4
+
+-- unreachable --
+
+ffff800082214ddc  bl arm64_rsi_init
+```
+
+Stable GREEN proves successful completion of the exact selected production
+PSCI DT-init path sufficiently for `psci_dt_init()` to return 0. It does not
+prove an exact PSCI firmware version, that every optional PSCI feature is
+supported, or that ignored-return operations succeeded.
+
+This closes PSCI DT initialization. The next architectural boundary is
+`arm64_rsi_init()`. Crossing it requires a new bounded phase plan/review. See
+`docs/2026-09-27-psci-dt-init-proof.md`.
