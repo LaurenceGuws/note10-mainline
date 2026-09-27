@@ -1249,3 +1249,107 @@ Stable BLUE proves the warning path was not taken, the genuine
 This closes `setup_arch()` completely. The next architectural boundary is
 `mm_core_init_early()`. See
 `docs/2026-09-27-setup-arch-return-proof.md`.
+
+The next accepted phase crossed `mm_core_init_early()` in two physical
+checkpoints.
+
+### MM1 ORANGE: bounded HugeTLB prelude
+
+Exact fixed bootargs contain no HugeTLB/CMA parameters.
+
+Exact proven-T1 binary storage was:
+
+```text
+hugetlb_cma_size = 0
+hugetlb_param_index = 0
+hugetlb_max_hstate = 0
+```
+
+The five reviewed HugeTLB production helpers remained instruction-equivalent to
+the BLUE parent.
+
+MM1 released only BLUE's hold. It executed the real
+`hugetlb_cma_reserve()` and `hugetlb_bootmem_alloc()` calls, then painted
+ORANGE immediately before `free_area_init()`.
+
+Captain reported ORANGE PASS under the accepted >=3-minute rule. Exact promoted
+MM1 BOOT:
+
+`5544ef05cac188ce6f8a96db5d06534b37618275bd6d07c7b416adf60e5497f1`
+
+Stable ORANGE proves the exact zero-CMA return path and bounded HugeTLB
+bootmem bookkeeping completed, with zero queued parameter callbacks, zero
+hstate-allocation iterations and no `free_area_init()` execution.
+
+### MM2 WHITE: free_area_init + genuine wrapper return
+
+MM2 preserved the ORANGE breadcrumb and removed only its hold.
+
+Production equivalence against MM1:
+
+```text
+free_area_init                 259 instructions
+free_area_init_node             81
+calc_nr_kernel_pages            76
+memmap_init                     83
+sparse_init                    111
+sparse_init_subsection_map      59
+arch_zone_limits_init           34
+```
+
+`free_area_init()` has zero source-level early returns and exactly one normal
+linked `ret`.
+
+Final wrapper/caller seam:
+
+```text
+ffff8000822334c8  bl free_area_init
+
+# genuine free_area_init return only
+ffff8000822334cc  ldp x29, x30, [sp], #0x10
+ffff8000822334d0  ldr x30, [x18, #-0x8]!
+...
+ffff8000822334dc  ret
+
+# now back in start_kernel
+ffff800082210610  ldr x9, [x19, #0x808]
+ffff800082210614  cbnz x9, WHITE_OK
+
+# NULL bridge preserves ORANGE
+ffff800082210618  wfe
+ffff80008221061c  b ffff800082210618
+
+# complete success only
+ffff800082210620  mov x10, x9
+ffff800082210624  mov x11, #0xffff
+ffff800082210628  movk x11, #0xffff, lsl #16
+ffff80008221062c  movk x11, #0xffff, lsl #32
+ffff800082210630  movk x11, #0xffff, lsl #48
+ffff800082210640  str x11, [x10], #8
+ffff80008221064c  dsb sy
+ffff800082210650  wfe
+ffff800082210654  b ffff800082210650
+
+-- unreachable --
+
+ffff800082210658  bl jump_label_init
+```
+
+Captain reported WHITE PASS under the accepted >=3-minute rule. Exact promoted
+MM2 BOOT:
+
+`c3e565842d2af6eab7e55de6b79f93d6e247196a2119553b0def3d644d8abef2`
+
+The exact DT still reserves `0xca000000..0xcc000000` as framebuffer
+`reserved-memory` with `no-map`. The evidence band
+`0xca3b1000..0xca3de000` remains entirely inside it.
+
+Stable WHITE closes `mm_core_init_early()`. It proves `free_area_init()` reached
+its function end and the wrapper genuinely returned, but not
+`memblock_free_all()`, `mem_init()`, slab readiness or `mm_core_init()`.
+
+The next linked `start_kernel()` boundary is its call to
+`jump_label_init()`. This must not be confused with an earlier
+`jump_label_init()` invocation already proven inside `setup_arch()`.
+
+See `docs/2026-09-27-mm-core-init-early-proof.md`.

@@ -20,43 +20,55 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`80587eb6d08902cc1047652a49f33094cb9a757db0f578dc34c885d4384ee220`
+`c3e565842d2af6eab7e55de6b79f93d6e247196a2119553b0def3d644d8abef2`
 
-It physically proves the complete final `setup_arch()` tail and genuine return
-to `start_kernel()`.
+It physically proves complete `mm_core_init_early()` through genuine return to
+`start_kernel()`.
 
-The exact frozen AArch64 loader still hands the kernel
-`x0=DT, x1=0, x2=0, x3=0`, and unchanged `preserve_boot_args` stores those
-values into `boot_args[]`. The final production `setup_arch()` boot-argument
-tail and epilogue remained semantically equivalent to the proven PURPLE parent.
+The phase used two independently reviewed checkpoints.
 
-After the actual `setup_arch()` `ret` landed back in `start_kernel()`, the
-T1 containment re-read `boot_args[1..3]` and required all three to remain zero.
-Only then did it reload the published `note10_paging_bridge`, require non-NULL,
-and paint BLUE (technical marker `0xff0000ff`).
+MM1 ORANGE first crossed only the bounded HugeTLB prelude. Exact promoted-T1
+bytes proved `hugetlb_cma_size == 0`, `hugetlb_param_index == 0` and
+`hugetlb_max_hstate == 0`. With fixed bootargs containing no HugeTLB/CMA
+parameters, unchanged `hugetlb_cma_reserve()` took its immediate zero-size
+return and unchanged `hugetlb_bootmem_alloc()` completed bounded node/list
+bookkeeping with zero queued parameter callbacks and zero hstate-allocation
+iterations. Captain reported ORANGE PASS under the accepted >=3-minute rule.
 
-Captain reported BLUE PASS under the accepted >=3-minute rule.
+MM2 then removed only the ORANGE hold and executed unchanged `free_area_init()`.
+The whole 259-instruction function and six core direct helpers remained
+production-equivalent to MM1. `free_area_init()` has no source-level early
+return and exactly one normal linked `ret`.
 
-Stable BLUE therefore proves:
-- the production boot-argument tail executed;
-- saved x1=x2=x3 were zero;
-- the warning `_printk` path was not taken;
-- genuine `setup_arch()` frame/callee-saved/SCS restoration completed;
-- genuine `setup_arch()` `ret` completed;
+After that real return, `mm_core_init_early()` restored its frame and x18/SCS
+return state and genuinely returned to `start_kernel()`. Only then did the
+caller freshly load the published Note10 bridge pointer and paint WHITE
+(technical marker `0xffffffff`). Captain reported WHITE PASS under the accepted
+>=3-minute rule.
+
+Stable WHITE therefore proves:
+- all MM1 ORANGE facts remain true;
+- unchanged `free_area_init()` reached its sole normal function end;
+- the sparsemem/NUMA/zone/node/memmap tranche completed sufficiently for
+  production to return;
+- genuine `mm_core_init_early()` frame/SCS restoration completed;
+- genuine `mm_core_init_early()` `ret` completed;
 - control returned to `start_kernel()`;
-- the evidence bridge remained valid/writable after return;
-- `mm_core_init_early()` did not execute.
+- the bridge pointer was freshly loaded after return and remained writable;
+- the next linked `start_kernel()` call to `jump_label_init()` did not execute.
 
-This closes `setup_arch()` completely.
+It does not prove `memblock_free_all()`, `mem_init()`, slab readiness or
+`mm_core_init()`. It also does not claim `jump_label_init()` never ran earlier:
+an earlier invocation is already part of the proven `setup_arch()` path.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`470198620f2cbd2544e029df8965bbe9581928cd3732225f75352caf62ae543e`
+`5544ef05cac188ce6f8a96db5d06534b37618275bd6d07c7b416adf60e5497f1`
 
-The previous checkpoint is MPIDR-hash H1. It proves the exact published hash and
-ends at PURPLE before the final boot-argument tail and genuine return.
+The previous checkpoint is MM1 ORANGE. It physically proves the bounded HugeTLB
+prelude and stops immediately before `free_area_init()`.
 
 ### Android RECOVERY checkpoint
 
