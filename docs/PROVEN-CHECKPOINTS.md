@@ -20,46 +20,44 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`0ecf7d177732160dca0d8e74d20074678510b8259db2fedb62558e6e773a7766`
+`aab7bbe7663f0659ce7fd025fb3d3f814f282f0174bda951a030baf267c488e3`
 
-It physically proves the complete PSCI DT initialization phase on the exact
-Exynos9825 DT lane. P1 crossed the already-proven `acpi_disabled == 1` branch,
-the linked no-op `early_ioremap_reset()`, PSCI DT node discovery and
-availability checks, then runtime-confirmed that the selected typed init
-function was exactly `psci_0_2_init`. BLUE (technical marker `0xff0000ff`)
-remained stable for at least three minutes while the indirect init call and
-therefore all PSCI firmware HVCs remained unreachable.
+It physically proves the complete arm64 RSI bypass phase on the exact proven
+PSCI/SMCCC state. Production `arm64_rsi_init()` and
+`arm_smccc_1_1_get_conduit()` remained instruction-equivalent to the proven
+PSCI parent. The accepted state proof established that after the physically
+proven HVC PSCI path, `arm_smccc_1_1_get_conduit()` can legitimately return
+only NONE or HVC, never SMC. The unchanged RSI entry compares the getter result
+against `SMCCC_CONDUIT_SMC == 1` and therefore takes the first non-SMC return
+before any RSI SMC, version/config query, realm-memory setup, or
+`static_branch_enable(&rsi_present)`.
 
-P2 then removed only the BLUE hold. The production `psci_0_2_init`,
-`get_set_conduit_method`, `psci_probe` and HVC helper bodies remained
-instruction-equivalent to P1. Exact DT method `"hvc"` selected the HVC
-conduit. The original indirect init call completed, `of_node_put()` executed,
-and `psci_dt_init()` completed its genuine frame/callee-saved/SCS restoration
-and `ret`. `setup_arch()` accepted only return value 0, freshly rebound its
-surviving bridge `x19 -> x9`, and painted GREEN (technical marker
-`0xff00ff00`) over the exact `0x2d000` evidence bridge. Captain reported PASS
-under the accepted GREEN >=3-minute physical rule. `arm64_rsi_init()` remains
-unreachable.
+After genuine `arm64_rsi_init()` frame/callee-saved/SCS restoration and
+`ret`, `setup_arch()` freshly rebound its surviving bridge `x19 -> x9` and
+painted CYAN (technical marker `0xff00ffff`) over the exact `0x2d000`
+evidence bridge. Captain reported CYAN PASS under the accepted >=3-minute
+physical rule. The actual linked `bl init_cpu_ops` remains unreachable behind
+the CYAN hold.
 
-The proof intentionally does not claim an exact PSCI firmware version, blanket
-optional-feature support, or success of ignored-return operations beyond what
-the production overall return semantics guarantee.
+The precise `rsi_present` claim is only that it was not enabled by
+`arm64_rsi_init()` on this path. No broader claim about hardware/global RSI or
+RME support is made, and the physical proof does not distinguish whether the
+runtime SMCCC getter returned NONE or HVC.
 
-A reviewer also recorded one non-blocking source-comment issue: the inherited
-`setup_arch()` PINK comment still says it will hold before
-`early_ioremap_reset()` although the executable hold was removed in P1. The
-frozen executable behavior and linked proof are correct.
+The previously stale PINK comment was corrected as reviewer-approved
+comment-only hygiene. A control build retaining the old comment produced
+identical normalized complete disassembly including relocations; only debug
+metadata differed because of the temporary worktree path.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`d74989d89b72e6e29acd6130cb64d7d9557316f24a10e94da3e64d1cd74fbadc`
+`0ecf7d177732160dca0d8e74d20074678510b8259db2fedb62558e6e773a7766`
 
-The previous checkpoint is PSCI P1. It physically proves a non-NULL,
-available PSCI DT node whose runtime selected typed init function equals
-`psci_0_2_init`, ending at the BLUE hold before the indirect init call and
-before any PSCI firmware HVC.
+The previous checkpoint is PSCI P2. It physically proves successful exact
+`psci_0_2_init` / HVC PSCI DT initialization through genuine return value 0,
+ending at the GREEN hold before `arm64_rsi_init()`.
 
 ### Android RECOVERY checkpoint
 

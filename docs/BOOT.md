@@ -821,3 +821,87 @@ supported, or that ignored-return operations succeeded.
 This closes PSCI DT initialization. The next architectural boundary is
 `arm64_rsi_init()`. Crossing it requires a new bounded phase plan/review. See
 `docs/2026-09-27-psci-dt-init-proof.md`.
+
+The next accepted phase crossed `arm64_rsi_init()` as one physically reviewed
+bypass checkpoint.
+
+The accepted state proof established:
+- `SMCCC_CONDUIT_NONE = 0`;
+- `SMCCC_CONDUIT_SMC = 1`;
+- `SMCCC_CONDUIT_HVC = 2`;
+- SMCCC starts at version 1.0 / conduit NONE;
+- the only repository caller of `arm_smccc_version_init()` is PSCI;
+- physically proven PSCI P2 selected HVC;
+- therefore the legitimate post-PSCI getter result is NONE or HVC, never SMC.
+
+Production `arm64_rsi_init()` begins:
+
+```c
+if (arm_smccc_1_1_get_conduit() != SMCCC_CONDUIT_SMC)
+    return;
+```
+
+S1 removed only the GREEN hold and left both `arm64_rsi_init()` and the SMCCC
+getter untouched. Fast object comparison confirmed 121 RSI instructions and 9
+getter instructions were unchanged. The function entered, called the unchanged
+getter, and on the accepted state took the non-SMC branch directly to its
+genuine frame/callee-saved/SCS restore and `ret`.
+
+Only after genuine return did `setup_arch()` freshly rebind its surviving
+bridge `x19 -> x9` and paint CYAN (technical marker `0xff00ffff`). CYAN
+passed the accepted >=3-minute physical rule. Exact promoted BOOT:
+
+`aab7bbe7663f0659ce7fd025fb3d3f814f282f0174bda951a030baf267c488e3`
+
+The final linked S1 boundary is:
+
+```text
+ffff80008221a5a0  bl arm_smccc_1_1_get_conduit
+ffff80008221a5a4  cmp w0, #0x1
+ffff80008221a5a8  b.ne ffff80008221a5f8
+
+-- SMC-only RSI body, unreachable on the accepted proven state --
+
+ffff80008221a5e8  bl __arm_smccc_smc
+
+-- accepted non-SMC return path --
+
+ffff80008221a5f8  mrs x8, SP_EL0
+ffff80008221a60c  ldp x29, x30, [sp, #0x40]
+ffff80008221a610  ldr x19, [sp, #0x50]
+ffff80008221a614  add sp, sp, #0x60
+ffff80008221a618  ldr x30, [x18, #-0x8]!
+ffff80008221a650  ret
+
+ffff800082214dd4  bl arm64_rsi_init
+ffff800082214dd8  mov x9, x19
+ffff800082214de0  mov x11, #0xffff
+ffff800082214de4  movk x11, #0xff00, lsl #16
+ffff800082214de8  movk x11, #0xffff, lsl #32
+ffff800082214dec  movk x11, #0xff00, lsl #48
+ffff800082214dfc  str x11, [x10], #8
+ffff800082214e08  dsb sy
+ffff800082214e0c  wfe
+ffff800082214e10  b ffff800082214e0c
+
+-- unreachable --
+
+ffff800082214e14  mov w0, wzr
+ffff800082214e18  bl init_cpu_ops
+```
+
+Stable CYAN proves the unchanged RSI function entered and genuinely returned on
+the accepted non-SMC path, so no RSI SMC/version/config/memory path executed
+and `rsi_present` was not enabled by `arm64_rsi_init()` on this path. It does
+not identify the getter result as specifically NONE or HVC and does not make a
+global hardware-support claim.
+
+The old PINK source comment was also corrected as reviewer-approved comment-only
+hygiene. An otherwise identical control build retaining the old comment
+produced identical normalized executable disassembly including relocations.
+
+This closes the arm64 RSI bypass phase. The next meaningful linked boundary is
+the actual `bl init_cpu_ops` with argument 0, i.e. `init_bootcpu_ops()`. The
+preceding compiler argument setup alone does not cross that boundary. Crossing
+`init_cpu_ops(0)` requires a new bounded phase plan/review. See
+`docs/2026-09-27-arm64-rsi-bypass-proof.md`.
