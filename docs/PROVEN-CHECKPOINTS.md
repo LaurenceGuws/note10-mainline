@@ -20,44 +20,41 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`aab7bbe7663f0659ce7fd025fb3d3f814f282f0174bda951a030baf267c488e3`
+`6abd2f0e776fa89f5023a5c5072261122263efa9339b098a91d25f0f5eacd1ef`
 
-It physically proves the complete arm64 RSI bypass phase on the exact proven
-PSCI/SMCCC state. Production `arm64_rsi_init()` and
-`arm_smccc_1_1_get_conduit()` remained instruction-equivalent to the proven
-PSCI parent. The accepted state proof established that after the physically
-proven HVC PSCI path, `arm_smccc_1_1_get_conduit()` can legitimately return
-only NONE or HVC, never SMC. The unchanged RSI entry compares the getter result
-against `SMCCC_CONDUIT_SMC == 1` and therefore takes the first non-SMC return
-before any RSI SMC, version/config query, realm-memory setup, or
-`static_branch_enable(&rsi_present)`.
+It physically proves the complete boot CPU operations-selection phase.
+Production `init_cpu_ops()`, `cpu_read_enable_method()`, `cpu_get_ops()` and
+`get_cpu_ops()` remained instruction-equivalent to the proven CYAN parent.
+The exact frozen DTB CPU0 node has `enable-method = "psci"` and the DT-supported
+ops table uniquely maps `"psci"` to `&cpu_psci_ops`.
 
-After genuine `arm64_rsi_init()` frame/callee-saved/SCS restoration and
-`ret`, `setup_arch()` freshly rebound its surviving bridge `x19 -> x9` and
-painted CYAN (technical marker `0xff00ffff`) over the exact `0x2d000`
-evidence bridge. Captain reported CYAN PASS under the accepted >=3-minute
-physical rule. The actual linked `bl init_cpu_ops` remains unreachable behind
-the CYAN hold.
+`cpu_ops[]` is static zero-initialized storage and the only writer is the
+assignment inside `init_cpu_ops()`. The `-ENODEV` failure leaves
+`cpu_ops[0] == NULL` and the unsupported-method `-EOPNOTSUPP` path stores NULL.
+After the original `init_bootcpu_ops() / init_cpu_ops(0)` call genuinely
+returned, the existing pure `get_cpu_ops(0)` accessor returned non-NULL.
+Combined with the exact frozen DT input and unchanged selector logic, this
+establishes `cpu_ops[0] == &cpu_psci_ops`.
 
-The precise `rsi_present` claim is only that it was not enabled by
-`arm64_rsi_init()` on this path. No broader claim about hardware/global RSI or
-RME support is made, and the physical proof does not distinguish whether the
-runtime SMCCC getter returned NONE or HVC.
+Only after that non-NULL result did `setup_arch()` freshly rebind its surviving
+bridge `x19 -> x9` and paint RED (technical marker `0xffff0000`) over the exact
+`0x2d000` evidence bridge. Captain observed bright RED upright for at least
+three minutes. A side-angle view briefly appeared orange; this was recorded as
+a panel/viewing-angle effect because the direct upright view was bright RED and
+stable.
 
-The previously stale PINK comment was corrected as reviewer-approved
-comment-only hygiene. A control build retaining the old comment produced
-identical normalized complete disassembly including relocations; only debug
-metadata differed because of the temporary worktree path.
+No `cpu_psci_ops` callback executed before RED, no kernel PSCI `CPU_ON` call
+occurred before RED, and `smp_init_cpus()` remained unreachable.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`0ecf7d177732160dca0d8e74d20074678510b8259db2fedb62558e6e773a7766`
+`aab7bbe7663f0659ce7fd025fb3d3f814f282f0174bda951a030baf267c488e3`
 
-The previous checkpoint is PSCI P2. It physically proves successful exact
-`psci_0_2_init` / HVC PSCI DT initialization through genuine return value 0,
-ending at the GREEN hold before `arm64_rsi_init()`.
+The previous checkpoint is RSI S1. It physically proves the genuine non-SMC
+`arm64_rsi_init()` return and ends at CYAN before the actual
+`init_cpu_ops(0)` call.
 
 ### Android RECOVERY checkpoint
 

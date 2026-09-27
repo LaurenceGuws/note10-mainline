@@ -905,3 +905,98 @@ the actual `bl init_cpu_ops` with argument 0, i.e. `init_bootcpu_ops()`. The
 preceding compiler argument setup alone does not cross that boundary. Crossing
 `init_cpu_ops(0)` requires a new bounded phase plan/review. See
 `docs/2026-09-27-arm64-rsi-bypass-proof.md`.
+
+The next accepted phase crossed only boot CPU operations selection.
+
+The source wrapper is:
+
+```c
+static inline void __init init_bootcpu_ops(void)
+{
+    init_cpu_ops(0);
+}
+```
+
+The exact frozen DTB CPU0 node contains:
+
+```text
+cpu@0 {
+    device_type = "cpu";
+    compatible = "arm,cortex-a55";
+    reg = <0x00 0x00>;
+    enable-method = "psci";
+};
+```
+
+The DT-supported operations table remains:
+
+```c
+&smp_spin_table_ops,  // "spin-table"
+&cpu_psci_ops,        // "psci"
+NULL
+```
+
+B1 removed only the CYAN hold and executed the original
+`init_bootcpu_ops() / init_cpu_ops(0)` call. Production
+`init_cpu_ops()`, `cpu_read_enable_method()`, `cpu_get_ops()` and
+`get_cpu_ops()` remained unchanged.
+
+`cpu_ops[]` is static zero-initialized and has one writer. Both production
+failure exits leave/store NULL. Thus the post-return pure
+`get_cpu_ops(0) != NULL` check distinguishes successful selection from both
+failure paths.
+
+Combined with the exact frozen CPU0 `"psci"` property and unchanged lookup
+table, that non-NULL result identifies `cpu_ops[0] == &cpu_psci_ops`.
+
+The final linked B1 boundary is:
+
+```text
+ffff800082214e0c  mov w0, wzr
+ffff800082214e10  bl init_cpu_ops
+
+ffff800082214e14  mov w0, wzr
+ffff800082214e18  bl get_cpu_ops
+ffff800082214e1c  cbnz x0, ffff800082214e28
+
+-- NULL preserves CYAN --
+
+ffff800082214e20  wfe
+ffff800082214e24  b ffff800082214e20
+
+-- non-NULL only --
+
+ffff800082214e28  mov x9, x19
+ffff800082214e30  mov x11, #0x0
+ffff800082214e34  movk x11, #0xffff, lsl #16
+ffff800082214e38  movk x11, #0xffff, lsl #48
+ffff800082214e48  str x11, [x10], #8
+ffff800082214e54  dsb sy
+ffff800082214e58  wfe
+ffff800082214e5c  b ffff800082214e58
+
+-- unreachable --
+
+ffff800082214e60  bl smp_init_cpus
+```
+
+Captain observed bright RED upright for at least three minutes. A side-angle
+view briefly appeared orange; because the upright direct view was stable bright
+RED, this was recorded as a panel/viewing-angle effect rather than a marker
+mismatch. Exact promoted BOOT:
+
+`6abd2f0e776fa89f5023a5c5072261122263efa9339b098a91d25f0f5eacd1ef`
+
+Stable RED proves:
+- original `init_cpu_ops(0)` executed and returned;
+- `get_cpu_ops(0)` returned non-NULL;
+- exact CPU0 DT plus unchanged selector logic establishes
+  `cpu_ops[0] == &cpu_psci_ops`;
+- boot CPU operations selection completed successfully;
+- no `cpu_psci_ops` callback ran before RED;
+- no kernel PSCI `CPU_ON` occurred before RED;
+- `smp_init_cpus()` did not execute.
+
+This closes boot CPU operations selection. The next architectural boundary is
+`smp_init_cpus()`. Crossing it requires a new bounded phase plan/review. See
+`docs/2026-09-27-bootcpu-ops-selection-proof.md`.
