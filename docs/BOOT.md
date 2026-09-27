@@ -654,3 +654,91 @@ This closes the accepted `bootmem_init()` phase. The next architectural boundary
 is `request_standard_resources()`. It requires a new bounded phase plan/review
 before physical work crosses that call. See
 `docs/2026-09-27-bootmem-init-proof.md`.
+
+The next phase crossed `request_standard_resources()` in two reviewed physical
+checkpoints. The phase-plan gate itself used an explicit Captain process
+exception because the phase-review prompt was accidentally sent back to the
+worker. `reviews/resources-phase-review.md` is therefore self-review analysis
+only and is not independent authority. The original bounded phase scope plus
+the Captain exception remained the governing plan, and both frozen candidates
+received normal independent candidate reviews before flashing.
+
+1. R1 removed only the M3 WHITE hold and entered unchanged
+   `request_standard_resources()`. It published kernel code/data physical
+   bounds, let both fixed `insert_resource()` calls return, captured
+   `memblock.memory.cnt`, calculated the exact `cnt * 64` backing size, and
+   executed unchanged `memblock_alloc_or_panic()`. Only after the non-NULL
+   allocation return was stored did it freshly load canonical
+   `note10_paging_bridge` and paint ORANGE (technical marker `0xffff8000`).
+   The `for_each_mem_region` loop remained unreachable. ORANGE remained stable
+   for at least three minutes. Exact promoted BOOT:
+   `fdc01a90fc95d24969370b6aeed33fca7ce6b1808c11cf60ab2f7e89877707d3`.
+2. R2 removed only the ORANGE hold and executed the existing
+   `for_each_mem_region` loop unchanged. Fast object normalization confirmed
+   the loop through genuine function epilogue was 73/73 normalized lines
+   identical to R1. Each reached region descriptor path completed and each
+   reached per-region `insert_resource()` call returned. After loop
+   termination, `request_standard_resources()` restored its compiler-managed
+   callee-saved/frame/SCS state and executed genuine `ret`. Only after return
+   did `setup_arch()` freshly rebind the surviving bridge `x19 -> x9` and
+   paint PINK (technical marker `0xffff40c0`). PINK remained stable under the
+   accepted >=3-minute rule. Exact promoted BOOT:
+   `d9c62bb19c49932752fae10644f76f4166ed4ee8e9f2fc627e1690432ebe6194`.
+
+The final linked R2 boundary is:
+
+```text
+ffff800082215100  str x9, [x8, #0x8]
+ffff800082215104  bl insert_resource
+ffff800082215108  ldr x8, [x20]
+ffff80008221510c  ldr x9, [x20, #0x18]
+ffff800082215110  add x22, x22, #0x18
+ffff800082215114  add x23, x23, #0x40
+ffff800082215118  madd x8, x8, x26, x9
+ffff80008221511c  cmp x22, x8
+ffff800082215120  b.lo ffff8000822150a4
+
+ffff800082215124  ldp x20, x19, [sp, #0x50]
+ffff800082215128  ldp x22, x21, [sp, #0x40]
+ffff80008221512c  ldp x24, x23, [sp, #0x30]
+ffff800082215130  ldp x26, x25, [sp, #0x20]
+ffff800082215134  ldp x28, x27, [sp, #0x10]
+ffff800082215138  ldp x29, x30, [sp], #0x60
+ffff80008221513c  ldr x30, [x18, #-0x8]!
+ffff800082215160  ret
+
+ffff800082214d44  bl request_standard_resources
+ffff800082214d48  mov x9, x19
+ffff800082214d50  mov x11, #0x40c0
+ffff800082214d54  movk x11, #0xffff, lsl #16
+ffff800082214d58  movk x11, #0x40c0, lsl #32
+ffff800082214d5c  movk x11, #0xffff, lsl #48
+ffff800082214d6c  str x11, [x10], #8
+ffff800082214d78  dsb sy
+ffff800082214d7c  wfe
+ffff800082214d80  b ffff800082214d7c
+
+-- unreachable --
+
+ffff800082214d84  bl early_ioremap_reset
+```
+
+The physical proof is intentionally narrow around `insert_resource()`.
+Production ignores each return value, so ORANGE/PINK prove only that each
+reached call returned and execution progressed. They do not prove successful
+resource-tree insertion.
+
+The backing allocation reserves memory through `memblock.reserved` and does not
+change the `memblock.memory` iterator set/count used by the subsequent loop.
+
+This closes `request_standard_resources()`. The source-level next call is
+`early_ioremap_reset()`, but on this exact arm64 build it links to a bare
+`ret`. arm64 defines `__early_set_fixmap` and `__late_set_fixmap` as the same
+`__set_fixmap()` operation, and `__late_clear_fixmap` as the corresponding
+`__set_fixmap(..., FIXMAP_PAGE_CLEAR)` form, so the `after_paging_init` state
+is dead and the compiler removes the assignment entirely.
+
+The next meaningful linked runtime boundary is therefore the already-proven
+`acpi_disabled == 1` selection into `psci_dt_init()`. Crossing that PSCI DT
+initialization requires a new bounded phase plan/review. See
+`docs/2026-09-27-request-standard-resources-proof.md`.

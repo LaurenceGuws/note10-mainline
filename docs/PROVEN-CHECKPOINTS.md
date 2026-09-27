@@ -20,28 +20,44 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`b2799d78e4d90e670dd291922d458ea9827ccad86cd93df5d6416a7c591d18b4`
+`d9c62bb19c49932752fae10644f76f4166ed4ee8e9f2fc627e1690432ebe6194`
 
-It physically proves the complete accepted `bootmem_init()` phase. The
-previously proven M1/M2 containment remains active, unchanged
-`dma_contiguous_reserve()`, `arch_reserve_crashkernel()` and
-`memblock_dump_all()` all return, and `bootmem_init()` executes its genuine
-frame/callee-saved/SCS restoration and `ret` back to `setup_arch()`. The
-surviving ordinary setup bridge is then freshly rebound `x19 -> x9` and paints
-WHITE (technical marker `0xffffffff`) over the established exact `0x2d000`
-evidence bridge. Captain reported PASS under the accepted WHITE >=3-minute
-physical rule. `CONFIG_KASAN` is off, so the next meaningful linked operation,
-`request_standard_resources()`, remains unreachable behind the WHITE hold.
+It physically proves the complete `request_standard_resources()` phase.
+Physically proven R1 established entry through the two fixed kernel code/data
+`insert_resource()` calls, capture of `memblock.memory.cnt`, exact
+`cnt * 64` backing-size calculation, and successful non-NULL return from
+unchanged `memblock_alloc_or_panic()`. Physically proven R2 then ran the
+unchanged `for_each_mem_region` loop to completion, executed every reached
+descriptor path and per-region `insert_resource()` call, and completed the
+genuine `request_standard_resources()` frame/callee-saved/SCS restoration and
+`ret` back to `setup_arch()`. The surviving ordinary setup bridge was freshly
+rebound `x19 -> x9` and painted PINK (technical marker `0xffff40c0`) over the
+exact `0x2d000` evidence bridge. Captain reported PASS under the accepted
+PINK >=3-minute physical rule. The source-level `early_ioremap_reset()` call
+remains unreachable from the physical checkpoint, but on this exact arm64 build
+that helper links to a bare `ret`: both early and late fixmap hooks resolve to
+the same `__set_fixmap()` implementation, so the `after_paging_init` assignment
+is optimized away. The next meaningful linked runtime boundary is the already
+proven `acpi_disabled == 1` selection into `psci_dt_init()`.
+No successful resource-tree insertion result is claimed because production
+ignores every `insert_resource()` return value.
+
+This phase proceeded under a recorded Captain process exception after the
+phase-plan review prompt was accidentally sent back to the worker. The worker's
+`resources-phase-review.md` is self-review analysis only and is not independent
+authority. Both R1 and R2 frozen candidates still received independent
+candidate reviews before physical flashing.
+
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`653d937868e1abcac2c41b5b59133e569b42dc5ed5a3abb215da11441e22dead`
+`fdc01a90fc95d24969370b6aeed33fca7ce6b1808c11cf60ab2f7e89877707d3`
 
-The previous checkpoint is M2. It physically proves unchanged
-`kvm_hyp_reserve()` and `dma_limits_init()` returned and runtime
-`arm64_dma_phys_limit == 0x100000000`, ending at the PURPLE hold before
-`dma_contiguous_reserve()`.
+The previous checkpoint is R1. It physically proves both fixed kernel code/data
+`insert_resource()` calls returned and unchanged `memblock_alloc_or_panic()`
+returned a non-NULL backing pointer, ending at the ORANGE hold before the
+memory-region loop. It does not prove either resource insertion succeeded.
 
 ### Android RECOVERY checkpoint
 
