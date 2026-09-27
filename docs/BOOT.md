@@ -1070,3 +1070,97 @@ for CPUs 1-7, but not present/online state and not secondary boot. No
 This closes `smp_init_cpus()`. The next architectural boundary is
 `smp_build_mpidr_hash()` and requires a new bounded phase plan/review. See
 `docs/2026-09-27-smp-init-cpus-proof.md`.
+
+The next accepted phase crossed only `smp_build_mpidr_hash()`.
+
+Physically proven possible maps entering the phase:
+
+```text
+0, 1, 2, 3, 4, 5, 0x100, 0x101
+```
+
+and:
+
+`num_possible_cpus() == 8`
+
+The exact deterministic derivation is:
+
+```text
+mask          = 0x107
+affinity      = [0x07, 0x01, 0x00, 0x00]
+fs            = [0, 0, 0, 0]
+bits/affinity = [3, 1, 0, 0]
+shift_aff     = [0, 5, 12, 28]
+bits          = 4
+hash_size     = 16
+```
+
+H1 removed only the YELLOW hold and executed original
+`smp_build_mpidr_hash()` unchanged. After genuine return, it required exact
+published hash fields and `num_possible_cpus() == 8`. Any failed independent
+check preserved YELLOW.
+
+The source-level diagnostic also requires `mpidr_hash_size() == 16`. Clang
+correctly eliminates that separate comparison because `bits == 4` already
+forces the unchanged inline `1 << bits` to equal 16.
+
+Final linked success boundary:
+
+```text
+ffff800082214f50  bl smp_build_mpidr_hash
+
+ffff800082214f5c  ldr x9, [mpidr_hash]
+ffff800082214f60  cmp x9, #0x107
+...
+ffff800082214f68  ldr w9, [mpidr_hash, #0x8]
+ffff800082214f6c  cbnz w9, FAIL_YELLOW
+ffff800082214f70  ldr w9, [mpidr_hash, #0xc]
+ffff800082214f74  cmp w9, #0x5
+ffff800082214f7c  ldr w9, [mpidr_hash, #0x10]
+ffff800082214f80  cmp w9, #0xc
+ffff800082214f88  ldr w9, [mpidr_hash, #0x14]
+ffff800082214f8c  cmp w9, #0x1c
+ffff800082214f94  ldr w8, [mpidr_hash, #0x18]
+ffff800082214f98  cmp w8, #0x4
+
+ffff800082214fa4  ldr w8, [__num_possible_cpus]
+ffff800082214fa8  cmp w8, #0x8
+
+ffff800082214fb0  wfe
+ffff800082214fb4  b ffff800082214fb0
+
+-- exact complete success only --
+
+ffff800082214fb8  mov x9, x19
+ffff800082214fc0  mov x11, #0xff
+ffff800082214fc4  movk x11, #0xff80, lsl #16
+ffff800082214fc8  movk x11, #0xff, lsl #32
+ffff800082214fcc  movk x11, #0xff80, lsl #48
+ffff800082214fdc  str x11, [x10], #8
+ffff800082214fe8  dsb sy
+ffff800082214fec  wfe
+ffff800082214ff0  b ffff800082214fec
+
+-- unreachable --
+
+ffff800082214ff4  adrp x8, boot_args
+```
+
+Captain reported PURPLE PASS under the accepted >=3-minute rule. Exact promoted
+BOOT:
+
+`470198620f2cbd2544e029df8965bbe9581928cd3732225f75352caf62ae543e`
+
+Stable PURPLE proves:
+- original `smp_build_mpidr_hash()` entered and genuinely returned;
+- published `mask == 0x107`;
+- published `shift_aff == [0,5,12,28]`;
+- published `bits == 4`, therefore hash size 16;
+- `num_possible_cpus() == 8`;
+- production large-hash warning predicate was false;
+- `boot_args[1..3]` tail did not execute;
+- `setup_arch()` did not return.
+
+This closes the MPIDR-hash phase. The next bounded decision is the
+`boot_args[1..3]` warning tail followed by genuine `setup_arch()` return. See
+`docs/2026-09-27-mpidr-hash-proof.md`.

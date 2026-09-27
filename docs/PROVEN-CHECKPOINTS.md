@@ -20,43 +20,42 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`5242447cfaa9fcda25358ac5aa08eabbda2d3fb59aef61195fcc8955348ede84`
+`470198620f2cbd2544e029df8965bbe9581928cd3732225f75352caf62ae543e`
 
-It physically proves the complete `smp_init_cpus()` phase. All nine production
-helpers remained instruction-equivalent to the proven RED parent. Exact frozen
-DT contains eight `"psci"` CPU nodes with MPIDRs
-`0,1,2,3,4,5,0x100,0x101`.
+It physically proves the complete `smp_build_mpidr_hash()` phase on the
+already-proven eight-CPU possible set. Production `smp_build_mpidr_hash()`
+remained instruction-equivalent to the proven YELLOW parent.
 
-The accepted anti-counterfeit pre-state is important: `CONFIG_INIT_ALL_POSSIBLE`
-is absent, the possible mask starts zeroed, `boot_cpu_init()` marks only CPU0
-possible before `setup_arch()`, secondary logical maps begin
-`INVALID_HWID`, and secondary `cpu_ops[]` entries begin NULL.
+The physically proven input maps are
+`0,1,2,3,4,5,0x100,0x101` with `num_possible_cpus() == 8`. Those inputs
+deterministically yield:
+- `mask = 0x107`;
+- `shift_aff = [0,5,12,28]`;
+- `bits = 4`;
+- `mpidr_hash_size() = 16`.
 
-After original `smp_init_cpus()` genuinely returned, diagnostic checks required:
-- CPU0 ops remained non-NULL;
-- all eight logical maps matched the exact DT MPIDRs;
-- every CPU 1-7 shared CPU0's already-proven PSCI ops pointer;
-- every CPU 1-7 was marked possible.
+After genuine hash-builder return, linked containment required every independent
+published field and possible-count value to match exactly. The source-level
+`mpidr_hash_size() == 16` check was optimized away as redundant once
+`mpidr_hash.bits == 4` is required, because the unchanged inline definition is
+exactly `1 << mpidr_hash.bits`.
 
-Any failure preserved RED. Only complete success repainted the evidence bridge
-YELLOW (technical marker `0xffffff00`). Captain reported YELLOW PASS under the
-accepted >=3-minute rule.
+Only complete success repainted the evidence bridge PURPLE (technical marker
+`0xff8000ff`). Captain reported PURPLE PASS under the accepted >=3-minute rule.
 
-Combined with exact all-`"psci"` DT input, unchanged selector logic and unchanged
-`cpu_psci_cpu_init()` which is exactly `mov w0, wzr; ret`, this establishes
-successful PSCI `cpu_init` for all seven secondaries. It does not establish
-that any secondary is present or online. No `cpu_prepare`, `cpu_boot`, or
-kernel PSCI `CPU_ON` occurred, and `smp_build_mpidr_hash()` remained
-unreachable.
+The production large-hash warning predicate is therefore false for the proven
+state: `16 > 4 * 8` is false. The subsequent `boot_args[1..3]` warning tail did
+not execute and `setup_arch()` did not return.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`6abd2f0e776fa89f5023a5c5072261122263efa9339b098a91d25f0f5eacd1ef`
+`5242447cfaa9fcda25358ac5aa08eabbda2d3fb59aef61195fcc8955348ede84`
 
-The previous checkpoint is boot CPU ops B1. It proves CPU0 selected
-`&cpu_psci_ops` and ends at RED before `smp_init_cpus()`.
+The previous checkpoint is SMP-init S2. It physically proves the exact
+eight-CPU logical maps, PSCI ops identity for CPUs 1-7, and their possible
+state, ending at YELLOW before `smp_build_mpidr_hash()`.
 
 ### Android RECOVERY checkpoint
 
