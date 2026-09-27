@@ -20,41 +20,43 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`6abd2f0e776fa89f5023a5c5072261122263efa9339b098a91d25f0f5eacd1ef`
+`5242447cfaa9fcda25358ac5aa08eabbda2d3fb59aef61195fcc8955348ede84`
 
-It physically proves the complete boot CPU operations-selection phase.
-Production `init_cpu_ops()`, `cpu_read_enable_method()`, `cpu_get_ops()` and
-`get_cpu_ops()` remained instruction-equivalent to the proven CYAN parent.
-The exact frozen DTB CPU0 node has `enable-method = "psci"` and the DT-supported
-ops table uniquely maps `"psci"` to `&cpu_psci_ops`.
+It physically proves the complete `smp_init_cpus()` phase. All nine production
+helpers remained instruction-equivalent to the proven RED parent. Exact frozen
+DT contains eight `"psci"` CPU nodes with MPIDRs
+`0,1,2,3,4,5,0x100,0x101`.
 
-`cpu_ops[]` is static zero-initialized storage and the only writer is the
-assignment inside `init_cpu_ops()`. The `-ENODEV` failure leaves
-`cpu_ops[0] == NULL` and the unsupported-method `-EOPNOTSUPP` path stores NULL.
-After the original `init_bootcpu_ops() / init_cpu_ops(0)` call genuinely
-returned, the existing pure `get_cpu_ops(0)` accessor returned non-NULL.
-Combined with the exact frozen DT input and unchanged selector logic, this
-establishes `cpu_ops[0] == &cpu_psci_ops`.
+The accepted anti-counterfeit pre-state is important: `CONFIG_INIT_ALL_POSSIBLE`
+is absent, the possible mask starts zeroed, `boot_cpu_init()` marks only CPU0
+possible before `setup_arch()`, secondary logical maps begin
+`INVALID_HWID`, and secondary `cpu_ops[]` entries begin NULL.
 
-Only after that non-NULL result did `setup_arch()` freshly rebind its surviving
-bridge `x19 -> x9` and paint RED (technical marker `0xffff0000`) over the exact
-`0x2d000` evidence bridge. Captain observed bright RED upright for at least
-three minutes. A side-angle view briefly appeared orange; this was recorded as
-a panel/viewing-angle effect because the direct upright view was bright RED and
-stable.
+After original `smp_init_cpus()` genuinely returned, diagnostic checks required:
+- CPU0 ops remained non-NULL;
+- all eight logical maps matched the exact DT MPIDRs;
+- every CPU 1-7 shared CPU0's already-proven PSCI ops pointer;
+- every CPU 1-7 was marked possible.
 
-No `cpu_psci_ops` callback executed before RED, no kernel PSCI `CPU_ON` call
-occurred before RED, and `smp_init_cpus()` remained unreachable.
+Any failure preserved RED. Only complete success repainted the evidence bridge
+YELLOW (technical marker `0xffffff00`). Captain reported YELLOW PASS under the
+accepted >=3-minute rule.
+
+Combined with exact all-`"psci"` DT input, unchanged selector logic and unchanged
+`cpu_psci_cpu_init()` which is exactly `mov w0, wzr; ret`, this establishes
+successful PSCI `cpu_init` for all seven secondaries. It does not establish
+that any secondary is present or online. No `cpu_prepare`, `cpu_boot`, or
+kernel PSCI `CPU_ON` occurred, and `smp_build_mpidr_hash()` remained
+unreachable.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`aab7bbe7663f0659ce7fd025fb3d3f814f282f0174bda951a030baf267c488e3`
+`6abd2f0e776fa89f5023a5c5072261122263efa9339b098a91d25f0f5eacd1ef`
 
-The previous checkpoint is RSI S1. It physically proves the genuine non-SMC
-`arm64_rsi_init()` return and ends at CYAN before the actual
-`init_cpu_ops(0)` call.
+The previous checkpoint is boot CPU ops B1. It proves CPU0 selected
+`&cpu_psci_ops` and ends at RED before `smp_init_cpus()`.
 
 ### Android RECOVERY checkpoint
 

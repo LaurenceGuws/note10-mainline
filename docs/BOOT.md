@@ -1000,3 +1000,73 @@ Stable RED proves:
 This closes boot CPU operations selection. The next architectural boundary is
 `smp_init_cpus()`. Crossing it requires a new bounded phase plan/review. See
 `docs/2026-09-27-bootcpu-ops-selection-proof.md`.
+
+The next accepted phase crossed `smp_init_cpus()` in one reviewed physical
+checkpoint.
+
+Exact frozen CPU topology:
+
+```text
+CPU0  0x000  psci
+CPU1  0x001  psci
+CPU2  0x002  psci
+CPU3  0x003  psci
+CPU4  0x004  psci
+CPU5  0x005  psci
+CPU6  0x100  psci
+CPU7  0x101  psci
+```
+
+Exact bootargs contain no `nosmp`, `maxcpus=` or `nr_cpus=`.
+
+The accepted starting-state proof also established:
+- `CONFIG_INIT_ALL_POSSIBLE` absent;
+- possible mask initially zero;
+- only CPU0 marked possible before `setup_arch()`;
+- CPUs 1-7 initially not possible;
+- secondary logical maps initially `INVALID_HWID`;
+- secondary CPU ops initially NULL.
+
+S2 removed only the RED hold and ran original `smp_init_cpus()` unchanged.
+After genuine return, it required the exact map vector, PSCI ops-pointer equality
+for CPUs 1-7, and `cpu_possible()` for every secondary. Any failed check
+preserved RED.
+
+Final linked success boundary:
+
+```text
+ffff800082214e60  bl smp_init_cpus
+
+# exact topology and per-secondary postconditions
+...
+ffff800082214f14  wfe
+ffff800082214f18  b ffff800082214f14
+
+# complete success only
+ffff800082214f1c  mov x9, x19
+ffff800082214f24  mov x11, #0xff00
+ffff800082214f28  movk x11, #0xffff, lsl #16
+ffff800082214f2c  movk x11, #0xff00, lsl #32
+ffff800082214f30  movk x11, #0xffff, lsl #48
+ffff800082214f40  str x11, [x10], #8
+ffff800082214f4c  dsb sy
+ffff800082214f50  wfe
+ffff800082214f54  b ffff800082214f50
+
+-- unreachable --
+
+ffff800082214f58  bl smp_build_mpidr_hash
+```
+
+Captain reported YELLOW PASS under the accepted >=3-minute rule. Exact promoted
+BOOT:
+
+`5242447cfaa9fcda25358ac5aa08eabbda2d3fb59aef61195fcc8955348ede84`
+
+Stable YELLOW proves successful PSCI `cpu_init` and possible-state publication
+for CPUs 1-7, but not present/online state and not secondary boot. No
+`cpu_prepare`, `cpu_boot` or kernel PSCI `CPU_ON` occurred.
+
+This closes `smp_init_cpus()`. The next architectural boundary is
+`smp_build_mpidr_hash()` and requires a new bounded phase plan/review. See
+`docs/2026-09-27-smp-init-cpus-proof.md`.
