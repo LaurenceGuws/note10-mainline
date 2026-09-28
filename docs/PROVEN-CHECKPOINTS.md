@@ -20,51 +20,51 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`6f2fa130f3ae71a3631e93272188e3b4c057e0e8ff2cbbc9c1b156f2b6f70bcf`
+`c7cc9b7d46b64943b6155a185b2b237f610d1ddb65a07de59e268669be6e3e86`
 
-It physically proves the second linked `start_kernel()` `jump_label_init()`
-invocation through its genuine return.
+It physically proves `early_security_init()` through its genuine zero-iteration
+return to `start_kernel()`.
 
-The exact image state begins with `static_key_initialized == 0`. The first
-linked `jump_label_init()` call is inside the already physically proven
-`setup_arch()` path. Under selected `CONFIG_JUMP_LABEL=y`, unchanged production
-code has one true writer and no selected clear writer. Complete `setup_arch()`
-return therefore establishes `static_key_initialized == true` before the second
-call.
+Exact final L1 links an empty early-LSM interval:
 
-J1 leaves the 86-instruction production `jump_label_init()` unchanged. The
-second call must therefore take its initialized `tbnz` fast-return path, skipping
-the false-only locking, sorting, jump-table rewrite, initialization store and
-unlock sequence while still executing the real common epilogue and `ret`.
+```text
+__start_early_lsm_info = 0xffff8000824b4880
+__end_early_lsm_info   = 0xffff8000824b4880
+```
 
-After genuine return the caller reloads the static-key byte as corroboration,
-then freshly loads the Note10 framebuffer bridge and paints GREEN
-(`0xff00ff00`). Captain reported GREEN PASS under the accepted >=3-minute rule.
+`CONFIG_SECURITY_LOCKDOWN_LSM_EARLY` is unset, so lockdown remains a normal
+later LSM and contributes no early descriptor. Unchanged 55-instruction
+`early_security_init()` therefore takes its first equal-bounds branch directly
+to the normal epilogue with zero loop iterations.
 
-Stable GREEN proves:
-- all physically proven MM2 WHITE facts remain true;
-- the second linked `jump_label_init()` executed;
-- its entry pre-state was initialized/true;
-- unchanged production semantics forced the initialized fast-return branch;
-- the false-only initialization path was skipped;
-- the common frame/callee-saved/x18-SCS restoration and genuine `ret` completed;
+Only after genuine return does the caller freshly load the Note10 framebuffer
+bridge and paint MAGENTA (`0xffff00ff`). Captain reported MAGENTA PASS under
+the accepted >=3-minute rule.
+
+Stable MAGENTA proves:
+- all J1 GREEN facts remain true;
+- unchanged `early_security_init()` executed;
+- exact equal early-LSM bounds forced zero iterations;
+- no early-LSM enable/order/prepare/init work ran in this invocation;
+- `lsm_count_early` was not incremented by its loop;
+- the normal epilogue set return value zero;
+- frame/callee-saved/x18-SCS restoration and genuine `ret` completed;
 - control returned to `start_kernel()`;
-- `static_key_initialized` remained true after return;
 - the bridge was freshly loaded after return and remained writable;
-- `early_security_init()` did not execute.
+- `get_boot_config_from_initrd()` did not execute.
 
-The post-return true check is corroboration only, not the fast-path
-discriminator. J1 makes no claim that `early_security_init()` or any LSM ran.
+It makes no claim that normal later LSMs initialized, that `security_init()`
+ran, or that bootconfig or command-line processing occurred.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`c3e565842d2af6eab7e55de6b79f93d6e247196a2119553b0def3d644d8abef2`
+`6f2fa130f3ae71a3631e93272188e3b4c057e0e8ff2cbbc9c1b156f2b6f70bcf`
 
-The previous checkpoint is MM2 WHITE. It physically proves complete
-`mm_core_init_early()` through genuine return to `start_kernel()` and stops
-before the second linked `jump_label_init()` call.
+The previous checkpoint is J1 GREEN. It physically proves the second linked
+`start_kernel()` `jump_label_init()` through its initialized fast-return path
+and stops before `early_security_init()`.
 
 ### Android RECOVERY checkpoint
 

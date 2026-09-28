@@ -1399,3 +1399,35 @@ This closes the second `jump_label_init()` boundary. It does not prove
 `early_security_init()` or any LSM ran.
 
 See `docs/2026-09-27-second-jump-label-proof.md`.
+
+## early_security_init: L1 MAGENTA
+
+L1 removed only J1 GREEN's terminal hold and executed unchanged
+`early_security_init()`.
+
+Final linked early-LSM bounds are exactly equal:
+
+```text
+ffff8000824b4880 D __start_early_lsm_info
+ffff8000824b4880 D __end_early_lsm_info
+```
+
+`CONFIG_SECURITY_LOCKDOWN_LSM_EARLY` is unset, so the linked early descriptor
+interval is empty. The unchanged 55-instruction function therefore branches
+straight from its initial bounds check to its normal `w0=0` epilogue and
+genuine return.
+
+After return, the caller freshly loads `note10_paging_bridge`. A NULL bridge
+leaves GREEN visible and self-holds. Complete success paints MAGENTA
+(`0xffff00ff`, duplicated `0xffff00ffffff00ff`) over `0x2d000`, executes
+`dsb sy`, and self-holds.
+
+Captain reported MAGENTA PASS under the accepted >=3-minute rule. Exact
+promoted BOOT:
+
+`c7cc9b7d46b64943b6155a185b2b237f610d1ddb65a07de59e268669be6e3e86`
+
+The next linked production call is `get_boot_config_from_initrd()` from the
+`CONFIG_BOOT_CONFIG=n` `setup_boot_config()` path. L1 stops before it.
+
+See `docs/2026-09-28-early-security-init-proof.md`.
