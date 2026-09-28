@@ -1431,3 +1431,31 @@ The next linked production call is `get_boot_config_from_initrd()` from the
 `CONFIG_BOOT_CONFIG=n` `setup_boot_config()` path. L1 stops before it.
 
 See `docs/2026-09-28-early-security-init-proof.md`.
+
+## get_boot_config_from_initrd: BC1 GOLD
+
+BC1 removes only L1 MAGENTA's terminal hold and crosses the exact
+`CONFIG_BOOT_CONFIG=n` `setup_boot_config()` call.
+
+The exact frozen 7,696-byte initramfs contains no `#BOOTCONFIG\n` magic at
+any of the four positions the unchanged 68-instruction production scan checks.
+Final uniLoader copies those exact bytes to physical `0x84000000` and patches
+`linux,initrd-end = 0x84001e10`.
+
+After genuine NULL return, BC1 requires nonzero runtime `initrd_start/end` and
+an exact `0x1e10` span. That span is corroboration only. The no-found proof
+comes from the exact four frozen probes plus unchanged production semantics.
+
+Complete success freshly loads `note10_paging_bridge`, paints GOLD
+(`0xffffd700`, duplicated `0xffffd700ffffd700`) over `0x2d000`, executes
+`dsb sy`, and self-holds before `setup_command_line()`.
+
+Captain reported GOLD PASS under the accepted >=3-minute rule. Exact promoted
+BOOT:
+
+`2e98f070ac0f68525aff65cdc63080501714cc56651e9f0d7d47c3e98021687e`
+
+This closes `get_boot_config_from_initrd(NULL)`. The next linked production
+boundary is `setup_command_line()`.
+
+See `docs/2026-09-28-get-boot-config-proof.md`.

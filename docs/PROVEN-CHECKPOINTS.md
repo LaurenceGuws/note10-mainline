@@ -20,51 +20,47 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`c7cc9b7d46b64943b6155a185b2b237f610d1ddb65a07de59e268669be6e3e86`
+`2e98f070ac0f68525aff65cdc63080501714cc56651e9f0d7d47c3e98021687e`
 
-It physically proves `early_security_init()` through its genuine zero-iteration
-return to `start_kernel()`.
+It physically proves the exact `CONFIG_BOOT_CONFIG=n`
+`get_boot_config_from_initrd(NULL)` path through genuine NULL return to
+`start_kernel()`.
 
-Exact final L1 links an empty early-LSM interval:
+Exact frozen initramfs is 7,696 bytes (`0x1e10`). Final uniLoader copies that
+exact payload to physical `0x84000000` and introduces DT initrd bounds through
+`0x84001e10`. The unchanged 68-instruction production function probes exactly
+four possible `#BOOTCONFIG\n` tail alignments.
 
-```text
-__start_early_lsm_info = 0xffff8000824b4880
-__end_early_lsm_info   = 0xffff8000824b4880
-```
+All four exact frozen probes mismatch. The found path is therefore unreachable
+on this exact input, so no bootconfig size/checksum/error/removal work can run.
 
-`CONFIG_SECURITY_LOCKDOWN_LSM_EARLY` is unset, so lockdown remains a normal
-later LSM and contributes no early descriptor. Unchanged 55-instruction
-`early_security_init()` therefore takes its first equal-bounds branch directly
-to the normal epilogue with zero loop iterations.
+Only after genuine return does BC1 load runtime `initrd_start/end`, require a
+nonzero exact `0x1e10` span, freshly load the Note10 framebuffer bridge and
+paint GOLD (`0xffffd700`). Captain reported GOLD PASS under the accepted
+>=3-minute rule.
 
-Only after genuine return does the caller freshly load the Note10 framebuffer
-bridge and paint MAGENTA (`0xffff00ff`). Captain reported MAGENTA PASS under
-the accepted >=3-minute rule.
+The runtime span check is corroboration only. The no-found path is
+distinguished by the exact frozen four probes plus unchanged production
+semantics.
 
-Stable MAGENTA proves:
-- all J1 GREEN facts remain true;
-- unchanged `early_security_init()` executed;
-- exact equal early-LSM bounds forced zero iterations;
-- no early-LSM enable/order/prepare/init work ran in this invocation;
-- `lsm_count_early` was not incremented by its loop;
-- the normal epilogue set return value zero;
-- frame/callee-saved/x18-SCS restoration and genuine `ret` completed;
+Stable GOLD proves:
+- all L1 MAGENTA facts remain true;
+- the runtime initrd window remained nonzero and exactly `0x1e10` after return;
+- all four exact bootconfig magic probes failed;
+- the found path and its size/checksum/error/removal work did not execute;
+- the ordinary frame/x18-SCS epilogue and genuine NULL return completed;
 - control returned to `start_kernel()`;
-- the bridge was freshly loaded after return and remained writable;
-- `get_boot_config_from_initrd()` did not execute.
-
-It makes no claim that normal later LSMs initialized, that `security_init()`
-ran, or that bootconfig or command-line processing occurred.
+- the bridge was freshly loaded after the runtime checks and remained writable;
+- `setup_command_line()` did not execute.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`6f2fa130f3ae71a3631e93272188e3b4c057e0e8ff2cbbc9c1b156f2b6f70bcf`
+`c7cc9b7d46b64943b6155a185b2b237f610d1ddb65a07de59e268669be6e3e86`
 
-The previous checkpoint is J1 GREEN. It physically proves the second linked
-`start_kernel()` `jump_label_init()` through its initialized fast-return path
-and stops before `early_security_init()`.
+The previous checkpoint is L1 MAGENTA. It closes `early_security_init()` and
+stops before the linked bootconfig scan.
 
 ### Android RECOVERY checkpoint
 
