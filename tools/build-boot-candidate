@@ -50,18 +50,58 @@ cp --reflink=auto "$base_boot" "$output_dir/base.img"
     exit 1
 }
 
-base_kernel_size="$(stat -c %s "$output_dir/work/kernel")"
+base_kernel_size="$(python3 - "$base_boot" <<'PY'
+from pathlib import Path
+import struct
+import sys
+
+blob = Path(sys.argv[1]).read_bytes()
+if blob[:8] != b"ANDROID!":
+    raise SystemExit("base image is not Android BOOT")
+print(struct.unpack_from("<I", blob, 8)[0])
+PY
+)"
 loader_size="$(stat -c %s "$uniloader")"
+kernel_part_size="$(stat -c %s "$output_dir/work/kernel")"
+kernel_dtb_size=0
+if [[ -f "$output_dir/work/kernel_dtb" ]]; then
+    kernel_dtb_size="$(stat -c %s "$output_dir/work/kernel_dtb")"
+fi
+
+if (( kernel_part_size + kernel_dtb_size != base_kernel_size )); then
+    echo "magiskboot kernel split does not cover the full BOOT kernel field" >&2
+    exit 1
+fi
 if (( loader_size > base_kernel_size )); then
     echo "uniLoader is larger than the base kernel slot" >&2
     exit 1
 fi
 
-cp "$uniloader" "$output_dir/work/kernel"
-truncate -s "$base_kernel_size" "$output_dir/work/kernel"
+python3 - "$uniloader" "$output_dir/work/kernel" "$output_dir/work/kernel_dtb" \
+    "$base_kernel_size" "$kernel_part_size" "$kernel_dtb_size" <<'PY'
+from pathlib import Path
+import sys
+
+loader = Path(sys.argv[1]).read_bytes()
+kernel = Path(sys.argv[2])
+kernel_dtb = Path(sys.argv[3])
+slot_size = int(sys.argv[4])
+kernel_size = int(sys.argv[5])
+kernel_dtb_size = int(sys.argv[6])
+
+slot = loader + bytes(slot_size - len(loader))
+kernel.write_bytes(slot[:kernel_size])
+
+if kernel_dtb_size:
+    kernel_dtb.write_bytes(slot[kernel_size:])
+elif kernel_dtb.exists():
+    kernel_dtb.unlink()
+PY
 
 {
     printf 'base_kernel_size=%s\n' "$base_kernel_size"
+    printf 'magiskboot_kernel_part_size=%s\n' "$kernel_part_size"
+    printf 'magiskboot_kernel_dtb_size=%s\n' "$kernel_dtb_size"
     printf 'loader_size=%s\n' "$loader_size"
     printf 'padding_size=%s\n' "$((base_kernel_size - loader_size))"
 } > "$output_dir/kernel-slot.txt"
