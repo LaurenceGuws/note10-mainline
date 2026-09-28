@@ -1,10 +1,15 @@
-# Kernel work
+# Kernel integration
 
-Do not vendor a full Linux tree here yet.
+Active Linux development does not live in this directory.
 
-Reference clones and build trees live in the workstream. Once the active delta is understood, prefer one of:
+Canonical kernel source:
 
-1. an explicit upstream base commit plus a small ordered patch/commit series; or
-2. a dedicated Linux fork whose history remains suitable for upstream-style review.
+`~/personal/exynos-9825-mainline-linux`
 
-`config/` contains maintained config fragments only. `patches/` is temporary staging for provenance-preserving patches that have not yet become proper kernel commits.
+GitHub:
+
+`LaurenceGuws/exynos-9825-mainline-linux`
+
+The `kernel/patches/` directory is historical provenance from the earliest bring-up tranche. Do not add new active kernel changes here. Real kernel changes belong in the Linux fork as normal Git commits.
+
+The exact kernel commit consumed by the whole-system build is pinned in `../components.lock`.

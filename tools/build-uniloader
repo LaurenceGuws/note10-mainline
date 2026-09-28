@@ -8,20 +8,32 @@ usage() {
 
 [[ $# -eq 5 ]] || usage
 
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 uniloader_repo="$(realpath "$1")"
 kernel_image="$(realpath "$2")"
 dtb="$(realpath "$3")"
 initramfs="$(realpath "$4")"
 output_dir="$(realpath -m "$5")"
+llvm_bin="${LLVM_BIN:?set LLVM_BIN to the pinned clang/ld.lld bin directory}"
 
 expected_commit="f45d73b344ce9ae8dab191836933ebfbed287afb"
-version_tag="f45d73b"
-build_date="2026-09-24 04:45:35 UTC"
+expected_tree="49a6246d833253d8e2fe28d8d93605d549083dc1"
+effective_source_commit="36ecc6a56967af0887af2a72fca81d091ae876a7"
+patch="$repo_root/loader/patches/0001-arm64-mark-final-kernel-jump-state.patch"
+version_tag="36ecc6a"
+build_date="2026-09-26 01:21:56 UTC"
 
 [[ -d "$uniloader_repo/.git" ]] || {
     echo "not a uniLoader Git checkout: $uniloader_repo" >&2
     exit 1
 }
+
+[[ -x "$llvm_bin/clang" && -x "$llvm_bin/ld.lld" ]] || {
+    echo "invalid LLVM_BIN: $llvm_bin" >&2
+    exit 1
+}
+
+export PATH="$llvm_bin:$PATH"
 
 for input in "$kernel_image" "$dtb" "$initramfs"; do
     [[ -f "$input" ]] || {
@@ -49,12 +61,27 @@ trap cleanup EXIT
 
 git -C "$uniloader_repo" worktree add --detach "$build_tree" "$expected_commit" >/dev/null
 
+[[ -f "$patch" ]] || {
+    echo "missing uniLoader delta: $patch" >&2
+    exit 1
+}
+
+git -C "$build_tree" apply --index "$patch"
+actual_tree="$(git -C "$build_tree" write-tree)"
+[[ "$actual_tree" == "$expected_tree" ]] || {
+    echo "unexpected reconstructed uniLoader tree: $actual_tree (expected $expected_tree)" >&2
+    exit 1
+}
+
 {
-    printf 'commit=%s\n' "$expected_commit"
+    printf 'upstream_commit=%s\n' "$expected_commit"
+    printf 'effective_source_commit=%s\n' "$effective_source_commit"
+    printf 'source_tree=%s\n' "$actual_tree"
+    sha256sum "$patch"
     printf 'GIT_VERSION_TAG=%s\n' "$version_tag"
     printf 'BUILD_DATE=%s\n' "$build_date"
     clang --version | head -1
-    zig ld.lld --version
+    ld.lld --version
     sha256sum "$kernel_image" "$dtb" "$initramfs"
 } > "$output_dir/inputs.txt"
 
@@ -64,7 +91,6 @@ git -C "$uniloader_repo" worktree add --detach "$build_tree" "$expected_commit" 
     make -j"$(nproc)" \
         ARCH=aarch64 \
         LLVM=1 \
-        LD='zig ld.lld' \
         GIT_VERSION_TAG="$version_tag" \
         BUILD_DATE="$build_date" \
         KERNEL_PATH="$kernel_image" \

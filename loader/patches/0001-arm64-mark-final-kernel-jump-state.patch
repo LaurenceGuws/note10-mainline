@@ -1,0 +1,92 @@
+From 36ecc6a56967af0887af2a72fca81d091ae876a7 Mon Sep 17 00:00:00 2001
+From: Laurence <lggousie46@gmail.com>
+Date: Sat, 26 Sep 2026 03:21:56 +0200
+Subject: [PATCH] arm64: mark final kernel jump state
+
+---
+ arch/aarch64/load-kernel.c | 62 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 62 insertions(+)
+
+diff --git a/arch/aarch64/load-kernel.c b/arch/aarch64/load-kernel.c
+index 8eee041..100e010 100644
+--- a/arch/aarch64/load-kernel.c
++++ b/arch/aarch64/load-kernel.c
+@@ -5,13 +5,75 @@
+  */
+ 
+ #include <main/boot.h>
++#include <lib/debug.h>
++#include <stdint.h>
+ #include <string.h>
+ 
++static uint64_t read_sysreg_currentel(void)
++{
++	uint64_t value;
++
++	__asm__ volatile("mrs %0, CurrentEL" : "=r"(value));
++	return value;
++}
++
++static uint64_t read_sysreg_daif(void)
++{
++	uint64_t value;
++
++	__asm__ volatile("mrs %0, DAIF" : "=r"(value));
++	return value;
++}
++
++static uint64_t read_matching_sctlr(uint64_t current_el)
++{
++	uint64_t value = 0;
++
++	switch ((current_el >> 2) & 0x3) {
++	case 1:
++		__asm__ volatile("mrs %0, sctlr_el1" : "=r"(value));
++		break;
++	case 2:
++		__asm__ volatile("mrs %0, sctlr_el2" : "=r"(value));
++		break;
++	case 3:
++		__asm__ volatile("mrs %0, sctlr_el3" : "=r"(value));
++		break;
++	default:
++		break;
++	}
++
++	return value;
++}
++
++static void print_u64_pair(const char *name, uint64_t value)
++{
++	printk(KERN_ALERT, "%s=0x%08x%08x\n", name,
++	       (uint32_t)(value >> 32), (uint32_t)value);
++}
++
+ void arch_load_kernel(void* kernel, void* dt, void* ramdisk)
+ {
++	uint64_t current_el;
++	uint64_t daif;
++	uint64_t sctlr;
++
+ 	memcpy((void*)CONFIG_PAYLOAD_ENTRY, kernel, (unsigned long) &kernel_size);
+ #ifndef CONFIG_RAMDISK_NO_COPY
+ 	__optimized_memcpy((void*)CONFIG_RAMDISK_ENTRY, ramdisk, (unsigned long) &ramdisk_size);
+ #endif
++
++	current_el = read_sysreg_currentel();
++	daif = read_sysreg_daif();
++	sctlr = read_matching_sctlr(current_el);
++
++	printk(KERN_ALERT, "COPY_DONE / JUMP_READY\n");
++	print_u64_pair("target", (uint64_t)CONFIG_PAYLOAD_ENTRY);
++	print_u64_pair("x0", (uint64_t)(uintptr_t)dt);
++	printk(KERN_ALERT, "CurrentEL=EL%u\n",
++	       (uint32_t)((current_el >> 2) & 0x3));
++	print_u64_pair("DAIF", daif);
++	print_u64_pair("SCTLR", sctlr);
++
+ 	load_kernel_and_jump(dt, 0, 0, 0, (void*)CONFIG_PAYLOAD_ENTRY);
+ }
+-- 
+2.55.0
+
