@@ -12,6 +12,7 @@ body {
   font: 18px/1.4 system-ui, sans-serif;
 }
 h1 { margin: 0 0 8px; }
+h2 { margin: 32px 0 8px; }
 p { color: #aaa; margin: 0 0 24px; }
 .row {
   display: grid;
@@ -34,7 +35,9 @@ code { font-family: ui-monospace, monospace; }
 </head>
 <body>
 <h1>Note10 bring-up lineage</h1>
-<p>Human color key for the physical mainline bring-up. Match the little final slot on the phone to the rendered color below. The last color it stays on is the result.</p>
+<p>Match the little final slot on the phone to the rendered color below. The last color it stays on is the result.</p>
+
+<h2>Proven N1R1 · setup_nr_cpu_ids()</h2>
 
 <div class="row">
   <div class="color" style="background:#40e0d0"></div>
@@ -69,7 +72,27 @@ code { font-family: ui-monospace, monospace; }
 <div class="row">
   <div class="color" style="background:#ff7f50"></div>
   <div class="name">CORAL / ORANGE<br><code>#ff7f50</code></div>
-  <div class="meaning">All N1 postconditions passed. This is N1 PASS.</div>
+  <div class="meaning">All N1 postconditions passed. N1R1 PASS.</div>
+</div>
+
+<h2>Current P1 candidate · setup_per_cpu_areas()</h2>
+
+<div class="row">
+  <div class="color" style="background:#ff7f50"></div>
+  <div class="name">CORAL / ORANGE<br><code>#ff7f50</code></div>
+  <div class="meaning"><code>setup_per_cpu_areas()</code> did not genuinely return.</div>
+</div>
+
+<div class="row">
+  <div class="color" style="background:#ff0000"></div>
+  <div class="name">RED<br><code>#ff0000</code></div>
+  <div class="meaning">Returned, but direct per-CPU publication or fresh bridge validation failed.</div>
+</div>
+
+<div class="row">
+  <div class="color" style="background:#00ff00"></div>
+  <div class="name">GREEN<br><code>#00ff00</code></div>
+  <div class="meaning">P1 PASS. <code>setup_per_cpu_areas()</code> returned and CPU0..7 runtime offsets validated.</div>
 </div>
 
 </body>
