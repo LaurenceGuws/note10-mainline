@@ -20,47 +20,44 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`2e98f070ac0f68525aff65cdc63080501714cc56651e9f0d7d47c3e98021687e`
+`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
 
-It physically proves the exact `CONFIG_BOOT_CONFIG=n`
-`get_boot_config_from_initrd(NULL)` path through genuine NULL return to
-`start_kernel()`.
+It physically proves `setup_command_line()` through genuine return to
+`start_kernel()` with exact published command-line copies.
 
-Exact frozen initramfs is 7,696 bytes (`0x1e10`). Final uniLoader copies that
-exact payload to physical `0x84000000` and introduces DT initrd bounds through
-`0x84001e10`. The unchanged 68-instruction production function probes exactly
-four possible `#BOOTCONFIG\n` tail alignments.
+Exact DT bootargs are 133 bytes plus terminating NUL. The selected build has
+`CONFIG_CMDLINE=""` and `CONFIG_BOOT_CONFIG=n`, so the nonempty DT line is
+preserved and optional bootconfig extra-command-line state is compiled away.
 
-All four exact frozen probes mismatch. The found path is therefore unreachable
-on this exact input, so no bootconfig size/checksum/error/removal work can run.
+Unchanged 67-instruction `setup_command_line()` therefore requests two
+134-byte memblock objects at 64-byte alignment, publishes
+`saved_command_line` and `static_command_line`, copies the exact line into
+both, publishes `saved_command_line_len = 133`, restores frame/SCS state and
+returns.
 
-Only after genuine return does BC1 load runtime `initrd_start/end`, require a
-nonzero exact `0x1e10` span, freshly load the Note10 framebuffer bridge and
-paint GOLD (`0xffffd700`). Captain reported GOLD PASS under the accepted
+Only after genuine return does C1 verify both pointers non-NULL, distinct and
+64-byte aligned, verify length 133 and NUL at index 133, then compare exact
+indices 0..133 of both buffers against `boot_command_line` using an explicit
+helper-free byte loop. Captain reported TURQUOISE PASS under the accepted
 >=3-minute rule.
 
-The runtime span check is corroboration only. The no-found path is
-distinguished by the exact frozen four probes plus unchanged production
-semantics.
-
-Stable GOLD proves:
-- all L1 MAGENTA facts remain true;
-- the runtime initrd window remained nonzero and exactly `0x1e10` after return;
-- all four exact bootconfig magic probes failed;
-- the found path and its size/checksum/error/removal work did not execute;
-- the ordinary frame/x18-SCS epilogue and genuine NULL return completed;
-- control returned to `start_kernel()`;
-- the bridge was freshly loaded after the runtime checks and remained writable;
-- `setup_command_line()` did not execute.
+Stable TURQUOISE proves:
+- all BC1 GOLD facts remain true;
+- both exact 134-byte / 64-byte allocation calls returned;
+- both published command-line buffers are exact byte copies including NUL;
+- `saved_command_line_len == 133`;
+- ordinary frame/callee-saved/x18-SCS restoration and genuine return completed;
+- the bridge was freshly loaded after all command-line checks and remained writable;
+- `setup_nr_cpu_ids()` did not execute.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`c7cc9b7d46b64943b6155a185b2b237f610d1ddb65a07de59e268669be6e3e86`
+`2e98f070ac0f68525aff65cdc63080501714cc56651e9f0d7d47c3e98021687e`
 
-The previous checkpoint is L1 MAGENTA. It closes `early_security_init()` and
-stops before the linked bootconfig scan.
+The previous checkpoint is BC1 GOLD. It closes
+`get_boot_config_from_initrd(NULL)` and stops before `setup_command_line()`.
 
 ### Android RECOVERY checkpoint
 

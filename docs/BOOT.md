@@ -1459,3 +1459,36 @@ This closes `get_boot_config_from_initrd(NULL)`. The next linked production
 boundary is `setup_command_line()`.
 
 See `docs/2026-09-28-get-boot-config-proof.md`.
+
+## setup_command_line: C1 TURQUOISE
+
+C1 removes only BC1 GOLD's terminal hold and executes unchanged
+`setup_command_line(command_line)`.
+
+The exact DT command line is 133 bytes plus NUL. On the selected
+`CONFIG_BOOT_CONFIG=n`, `CONFIG_CMDLINE=""` build, optional extra-command-line
+state is absent and `command_line` is exactly the `boot_command_line` pointer.
+
+The unchanged target makes two 134-byte memblock allocation requests at
+64-byte alignment, publishes the saved/static pointers, copies the exact line
+into both, stores `saved_command_line_len = 133`, restores frame/SCS state and
+returns.
+
+After return, C1 freshly validates both published pointers, length 133, NUL at
+index 133, and exact bytes 0..133 of both buffers. The final linked diagnostic
+is a bounded inline 134-iteration `ldrb` loop with no helper call and no
+index-134 read.
+
+Complete success freshly loads `note10_paging_bridge`, paints TURQUOISE
+(`0xff40e0d0`, duplicated `0xff40e0d0ff40e0d0`) over `0x2d000`, executes
+`dsb sy`, and self-holds before `setup_nr_cpu_ids()`.
+
+Captain reported TURQUOISE PASS under the accepted >=3-minute rule. Exact
+promoted BOOT:
+
+`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
+
+This closes `setup_command_line()`. The next linked production boundary is
+`setup_nr_cpu_ids()`.
+
+See `docs/2026-09-28-setup-command-line-proof.md`.
