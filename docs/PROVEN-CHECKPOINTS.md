@@ -20,44 +20,32 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
+`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
 
-It physically proves `setup_command_line()` through genuine return to
-`start_kernel()` with exact published command-line copies.
+It physically proves `setup_nr_cpu_ids()` through genuine return and exact
+eight-CPU publication.
 
-Exact DT bootargs are 133 bytes plus terminating NUL. The selected build has
-`CONFIG_CMDLINE=""` and `CONFIG_BOOT_CONFIG=n`, so the nonempty DT line is
-preserved and optional bootconfig extra-command-line state is compiled away.
+N1R1 repaired the failed N1 diagnostic control-flow edge without changing the
+production `setup_nr_cpu_ids()` or `_find_last_bit()` records. After the one
+reachable target call, the frozen ladder independently proved:
 
-Unchanged 67-instruction `setup_command_line()` therefore requests two
-134-byte memblock objects at 64-byte alignment, publishes
-`saved_command_line` and `static_command_line`, copies the exact line into
-both, publishes `saved_command_line_len = 133`, restores frame/SCS state and
-returns.
+- fresh `nr_cpu_ids == 8`;
+- fresh `__num_possible_cpus == 8`;
+- exact eight-word possible mask `0xff,0,0,0,0,0,0,0`;
+- fresh non-NULL writable framebuffer bridge.
 
-Only after genuine return does C1 verify both pointers non-NULL, distinct and
-64-byte aligned, verify length 133 and NUL at index 133, then compare exact
-indices 0..133 of both buffers against `boot_command_line` using an explicit
-helper-free byte loop. Captain reported TURQUOISE PASS under the accepted
->=3-minute rule.
-
-Stable TURQUOISE proves:
-- all BC1 GOLD facts remain true;
-- both exact 134-byte / 64-byte allocation calls returned;
-- both published command-line buffers are exact byte copies including NUL;
-- `saved_command_line_len == 133`;
-- ordinary frame/callee-saved/x18-SCS restoration and genuine return completed;
-- the bridge was freshly loaded after all command-line checks and remained writable;
-- `setup_nr_cpu_ids()` did not execute.
+Captain observed stable CORAL / ORANGE `0xffff7f50` for longer than the
+accepted three-minute rule.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`2e98f070ac0f68525aff65cdc63080501714cc56651e9f0d7d47c3e98021687e`
+`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
 
-The previous checkpoint is BC1 GOLD. It closes
-`get_boot_config_from_initrd(NULL)` and stops before `setup_command_line()`.
+The previous checkpoint is C1 TURQUOISE. It proves `setup_command_line()`
+through genuine return with exact published command-line copies and stops
+before `setup_nr_cpu_ids()`.
 
 ### Android RECOVERY checkpoint
 
@@ -93,20 +81,20 @@ RECOVERY NEED:
     restore immutable Android RECOVERY checkpoint
 ```
 
-## Packaging template versus progression parent
+## Packaging from a promoted MAINLINE BOOT
 
-The current BOOT construction helper uses `magiskboot unpack/repack`. When a
-promoted mainline BOOT already contains uniLoader plus zero padding,
-`magiskboot unpack` trims that representation and does not expose the full
-Android BOOT header `kernel_size` as the extracted `kernel` file size.
+The BOOT construction helper uses `magiskboot unpack/repack`.
 
-Therefore:
+On this image, `magiskboot` exposes the Android BOOT kernel field as two files:
+`kernel` and `kernel_dtb`. Their sizes sum to the exact header `kernel_size`.
 
-- the proven MAINLINE checkpoint remains the progression/rollback authority;
-- the immutable Android RECOVERY BOOT remains the canonical deterministic
-  envelope template for constructing the next BOOT;
-- every candidate is separately verified against the proven MAINLINE parent so
-  ramdisk, post-ramdisk tail, geometry and AVB lineage cannot drift.
+`tools/build-boot-candidate` now treats those two extracted files as one
+logical kernel field. It writes `uniLoader + zero padding` across that full
+field, then lets `magiskboot` repack it.
 
-This distinction is packaging mechanics only. It does not demote the mainline
-checkpoint or make Android the routine rollback target.
+The helper is regression-proven by self-repacking C1 with C1's own uniLoader
+and reproducing exact C1 bytes.
+
+Therefore the current proven MAINLINE BOOT can serve directly as both the
+progression parent and deterministic BOOT envelope for the next candidate.
+The immutable Android recovery BOOT remains only the emergency recovery floor.
