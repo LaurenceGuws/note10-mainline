@@ -55,4 +55,4 @@ Rows 512..671 are the intentional persistent early-head boot trail.
 
 Rows 672..703 are the single reusable final-state checkpoint slot.
 
-See `FRAMEBUFFER-BREADCRUMBS.md` and `n1r1-color-key.html`.
+See `FRAMEBUFFER-BREADCRUMBS.md` and `bring-up-lineage.html`.
