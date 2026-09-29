@@ -4,47 +4,48 @@
 
 Kernel commit:
 
-`fe03932bd4c34e1d54344926fa3df8203e909a23`
+`8498fcece358e77f29873dc6f27ba0828a5259ab`
 
 BOOT:
 
-`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
+`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
 
-Proven boundary: `smp_prepare_boot_cpu()` genuinely returned and the boot CPU
-runtime per-CPU base handoff validated.
+Proven boundary: `early_numa_node_init()` genuinely returned and runtime
+`numa_node` publication for CPU0..7 validated.
 
-P2 physically settled on WHITE `0xffffffff` for the accepted three-minute
-window.
+NH1 physically settled on CYAN `0xff00ffff` and the accepted stability gate
+passed.
 
 That proves:
 
-- the proven P1 runtime per-CPU publication remained intact;
-- `smp_prepare_boot_cpu()` genuinely returned;
-- the post-return `TPIDR_EL1` value exactly matched `__per_cpu_offset[0]`;
+- the proven P2 CPU0 runtime per-CPU base handoff remained intact;
+- `early_numa_node_init()` genuinely returned;
+- runtime `per_cpu(numa_node, cpu) == 0` for every possible CPU0..7;
 - a fresh `note10_paging_bridge` load remained non-NULL and writable;
-- `early_numa_node_init()` did not execute.
+- `boot_cpu_hotplug_init()` did not execute.
 
-The production `smp_prepare_boot_cpu()`, `cpuinfo_store_boot_cpu()`, and
-`setup_boot_cpu_features()` records remained exact versus promoted P1.
+The production `early_numa_node_init()` and `early_cpu_to_node()` records
+remained function-relative exact versus promoted P2.
 
 ## Previous proven MAINLINE
 
-P1:
+P2:
 
-`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
+`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
 
 Kernel source:
 
-`a08d512a731a802f9ebc52c515a8254193b82790`
+`fe03932bd4c34e1d54344926fa3df8203e909a23`
 
-P1 proves `setup_per_cpu_areas()` through genuine return and exact CPU0..7
-runtime per-CPU publication.
+P2 proves `smp_prepare_boot_cpu()` through genuine return with
+`TPIDR_EL1 == __per_cpu_offset[0]`.
 
 ## Current next boundary
 
-`early_numa_node_init()`.
+`boot_cpu_hotplug_init()`.
 
-Do not cross it until the next bounded phase plan has been independently accepted.
+The accepted NH2 plan must stop before
+`print_kernel_cmdline(saved_command_line)`.
 
 ## Framebuffer evidence model
 

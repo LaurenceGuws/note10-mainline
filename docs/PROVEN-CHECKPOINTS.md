@@ -20,27 +20,28 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
+`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
 
-It physically proves `smp_prepare_boot_cpu()` through genuine return and the
-CPU0 runtime per-CPU base handoff.
+It physically proves `early_numa_node_init()` through genuine return and exact
+runtime NUMA-node publication for every possible CPU0..7.
 
-P2 preserved the proven P1 framebuffer bridge, painted BLUE immediately after
-the unchanged target returned, directly read `TPIDR_EL1`, directly compared it
-with `__per_cpu_offset[0]`, freshly reloaded the framebuffer bridge, and
-painted WHITE only after the handoff check passed.
+NH1 preserved the proven P2 framebuffer bridge, painted RED immediately after
+the unchanged target returned, directly checked runtime `numa_node` for all
+eight CPUs, freshly reloaded the framebuffer bridge, and painted CYAN only
+after all eight values were exactly zero.
 
-Captain observed stable WHITE `0xffffffff` for the accepted three-minute rule.
+Captain reported the decoded CYAN meaning and the accepted stability gate
+passed.
 
-The accepted P1/P2 phase is complete and this checkpoint remains installed.
+The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
+`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
 
-The previous checkpoint is P1 GREEN. It proves `setup_per_cpu_areas()`
-through genuine return with exact CPU0..7 runtime offset publication and stops
-before `smp_prepare_boot_cpu()`.
+The previous checkpoint is P2 WHITE. It proves `smp_prepare_boot_cpu()` through
+genuine return with `TPIDR_EL1 == __per_cpu_offset[0]` and stops before
+`early_numa_node_init()`.
 
 ### Android RECOVERY checkpoint
 
