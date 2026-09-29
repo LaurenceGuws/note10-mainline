@@ -20,32 +20,27 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
+`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
 
-It physically proves `setup_nr_cpu_ids()` through genuine return and exact
-eight-CPU publication.
+It physically proves `setup_per_cpu_areas()` through genuine return and the
+directly verified runtime per-CPU publication for CPU0..7.
 
-N1R1 repaired the failed N1 diagnostic control-flow edge without changing the
-production `setup_nr_cpu_ids()` or `_find_last_bit()` records. After the one
-reachable target call, the frozen ladder independently proved:
+P1 preserved the proven N1 state, called the unchanged production percpu path,
+painted RED immediately after genuine return, directly checked all eight
+published offsets, freshly reloaded the framebuffer bridge, and painted GREEN
+only after those checks passed.
 
-- fresh `nr_cpu_ids == 8`;
-- fresh `__num_possible_cpus == 8`;
-- exact eight-word possible mask `0xff,0,0,0,0,0,0,0`;
-- fresh non-NULL writable framebuffer bridge.
-
-Captain observed stable CORAL / ORANGE `0xffff7f50` for longer than the
-accepted three-minute rule.
+Captain observed stable GREEN `0xff00ff00` for the accepted three-minute rule.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
+`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
 
-The previous checkpoint is C1 TURQUOISE. It proves `setup_command_line()`
-through genuine return with exact published command-line copies and stops
-before `setup_nr_cpu_ids()`.
+The previous checkpoint is N1R1 CORAL / ORANGE. It proves
+`setup_nr_cpu_ids()` through genuine return with exact eight-CPU state and
+stops before `setup_per_cpu_areas()`.
 
 ### Android RECOVERY checkpoint
 

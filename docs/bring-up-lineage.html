@@ -5,32 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Note10 Bring-up Lineage</title>
 <style>
-body {
-  margin: 24px;
-  background: #111;
-  color: #eee;
-  font: 18px/1.4 system-ui, sans-serif;
-}
-h1 { margin: 0 0 8px; }
-h2 { margin: 32px 0 8px; }
-p { color: #aaa; margin: 0 0 24px; }
-.row {
-  display: grid;
-  grid-template-columns: 180px 180px 1fr;
-  gap: 16px;
-  align-items: center;
-  margin: 10px 0;
-}
-.color {
-  height: 72px;
-  border: 1px solid #666;
-}
-.name { font-weight: 700; }
-code { font-family: ui-monospace, monospace; }
-@media (max-width: 700px) {
-  .row { grid-template-columns: 120px 1fr; }
-  .meaning { grid-column: 1 / -1; margin-bottom: 12px; }
-}
+body{margin:24px;background:#111;color:#eee;font:18px/1.4 system-ui,sans-serif}
+h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
+.row{display:grid;grid-template-columns:180px 180px 1fr;gap:16px;align-items:center;margin:10px 0}
+.color{height:72px;border:1px solid #666}.name{font-weight:700} code{font-family:ui-monospace,monospace}
+@media(max-width:700px){.row{grid-template-columns:120px 1fr}.meaning{grid-column:1/-1;margin-bottom:12px}}
 </style>
 </head>
 <body>
@@ -38,62 +17,22 @@ code { font-family: ui-monospace, monospace; }
 <p>Match the little final slot on the phone to the rendered color below. The last color it stays on is the result.</p>
 
 <h2>Proven N1R1 · setup_nr_cpu_ids()</h2>
+<div class="row"><div class="color" style="background:#40e0d0"></div><div class="name">TURQUOISE<br><code>#40e0d0</code></div><div class="meaning"><code>setup_nr_cpu_ids()</code> did not genuinely return.</div></div>
+<div class="row"><div class="color" style="background:#8000ff"></div><div class="name">VIOLET<br><code>#8000ff</code></div><div class="meaning">Returned, but <code>nr_cpu_ids != 8</code>.</div></div>
+<div class="row"><div class="color" style="background:#0000ff"></div><div class="name">BLUE<br><code>#0000ff</code></div><div class="meaning"><code>nr_cpu_ids == 8</code>, but <code>__num_possible_cpus != 8</code>.</div></div>
+<div class="row"><div class="color" style="background:#ffff00"></div><div class="name">YELLOW<br><code>#ffff00</code></div><div class="meaning">Both scalar CPU counts passed, but the exact possible-mask check failed.</div></div>
+<div class="row"><div class="color" style="background:#7fff00"></div><div class="name">LIME<br><code>#7fff00</code></div><div class="meaning">Exact possible mask passed, but the fresh framebuffer bridge was NULL.</div></div>
+<div class="row"><div class="color" style="background:#ff7f50"></div><div class="name">CORAL / ORANGE<br><code>#ff7f50</code></div><div class="meaning">N1R1 PASS.</div></div>
 
-<div class="row">
-  <div class="color" style="background:#40e0d0"></div>
-  <div class="name">TURQUOISE<br><code>#40e0d0</code></div>
-  <div class="meaning"><code>setup_nr_cpu_ids()</code> did not genuinely return.</div>
-</div>
+<h2>Proven P1 · setup_per_cpu_areas()</h2>
+<div class="row"><div class="color" style="background:#ff7f50"></div><div class="name">CORAL / ORANGE<br><code>#ff7f50</code></div><div class="meaning"><code>setup_per_cpu_areas()</code> did not genuinely return.</div></div>
+<div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning">Returned, but direct per-CPU publication or fresh bridge validation failed.</div></div>
+<div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning">P1 PASS. CPU0..7 runtime offsets validated.</div></div>
 
-<div class="row">
-  <div class="color" style="background:#8000ff"></div>
-  <div class="name">VIOLET<br><code>#8000ff</code></div>
-  <div class="meaning">Returned, but <code>nr_cpu_ids != 8</code>.</div>
-</div>
-
-<div class="row">
-  <div class="color" style="background:#0000ff"></div>
-  <div class="name">BLUE<br><code>#0000ff</code></div>
-  <div class="meaning"><code>nr_cpu_ids == 8</code>, but <code>__num_possible_cpus != 8</code>.</div>
-</div>
-
-<div class="row">
-  <div class="color" style="background:#ffff00"></div>
-  <div class="name">YELLOW<br><code>#ffff00</code></div>
-  <div class="meaning">Both scalar CPU counts passed, but the exact possible-mask check failed.</div>
-</div>
-
-<div class="row">
-  <div class="color" style="background:#7fff00"></div>
-  <div class="name">LIME<br><code>#7fff00</code></div>
-  <div class="meaning">Exact possible mask passed, but the fresh framebuffer bridge was NULL.</div>
-</div>
-
-<div class="row">
-  <div class="color" style="background:#ff7f50"></div>
-  <div class="name">CORAL / ORANGE<br><code>#ff7f50</code></div>
-  <div class="meaning">All N1 postconditions passed. N1R1 PASS.</div>
-</div>
-
-<h2>Current P1 candidate · setup_per_cpu_areas()</h2>
-
-<div class="row">
-  <div class="color" style="background:#ff7f50"></div>
-  <div class="name">CORAL / ORANGE<br><code>#ff7f50</code></div>
-  <div class="meaning"><code>setup_per_cpu_areas()</code> did not genuinely return.</div>
-</div>
-
-<div class="row">
-  <div class="color" style="background:#ff0000"></div>
-  <div class="name">RED<br><code>#ff0000</code></div>
-  <div class="meaning">Returned, but direct per-CPU publication or fresh bridge validation failed.</div>
-</div>
-
-<div class="row">
-  <div class="color" style="background:#00ff00"></div>
-  <div class="name">GREEN<br><code>#00ff00</code></div>
-  <div class="meaning">P1 PASS. <code>setup_per_cpu_areas()</code> returned and CPU0..7 runtime offsets validated.</div>
-</div>
+<h2>Current P2 candidate · smp_prepare_boot_cpu()</h2>
+<div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning"><code>smp_prepare_boot_cpu()</code> did not genuinely return.</div></div>
+<div class="row"><div class="color" style="background:#0000ff"></div><div class="name">BLUE<br><code>#0000ff</code></div><div class="meaning">Returned, but <code>TPIDR_EL1</code> did not equal the published CPU0 runtime offset or the fresh bridge check failed.</div></div>
+<div class="row"><div class="color" style="background:#ffffff"></div><div class="name" style="color:#fff">WHITE<br><code>#ffffff</code></div><div class="meaning">P2 PASS. CPU0 is on the runtime per-CPU base.</div></div>
 
 </body>
 </html>

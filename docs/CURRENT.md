@@ -4,50 +4,52 @@
 
 Kernel commit:
 
-`854aa12e5f43720d2ee3e08b6922bc85e1e6f70e`
+`a08d512a731a802f9ebc52c515a8254193b82790`
 
 BOOT:
 
-`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
+`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
 
-Proven boundary: `setup_nr_cpu_ids()` genuinely returned and published the
-accepted eight-CPU state.
+Proven boundary: `setup_per_cpu_areas()` genuinely returned and the runtime
+per-CPU publication for CPU0..7 validated.
 
-N1R1 physically settled on the frozen CORAL / ORANGE marker `0xffff7f50`
-for longer than the accepted three-minute window.
+P1 physically settled on GREEN `0xff00ff00` for the accepted three-minute
+window.
 
-That proves, in order:
+That proves:
 
-- the repaired C1 success path reached the one ordinary `setup_nr_cpu_ids()` call;
-- `setup_nr_cpu_ids()` returned;
-- `nr_cpu_ids == 8`;
-- `__num_possible_cpus == 8`;
-- the exact eight-word possible mask is `0xff,0,0,0,0,0,0,0`;
-- a fresh `note10_paging_bridge` load remained non-NULL and writable.
+- the exact proven N1R1 state remained intact through the target entry;
+- `setup_per_cpu_areas()` genuinely returned;
+- fresh `pcpu_base_addr` was non-NULL;
+- fresh `pcpu_unit_offsets` was non-NULL;
+- for CPU0..7, `__per_cpu_offset[cpu]` exactly matched
+  `((unsigned long)pcpu_base_addr - (unsigned long)__per_cpu_start) +
+  pcpu_unit_offsets[cpu]`;
+- a fresh `note10_paging_bridge` load remained non-NULL and writable;
+- `smp_prepare_boot_cpu()` did not execute.
 
-The production `setup_nr_cpu_ids()` and `_find_last_bit()` instruction /
-relocation records remained exact versus failed N1. The failure in failed N1
-was the diagnostic success edge falling into the old C1 terminal hold, not the
-production CPU-ID setup itself.
+The production percpu implementation remained unchanged from proven N1R1.
+P1 does not claim whether the embed allocator succeeded directly or the
+supported page allocator fallback was used.
 
 ## Previous proven MAINLINE
 
-C1:
+N1R1:
 
-`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
+`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
 
 Kernel source:
 
-`16f5becb8d1e0116f7a070e3ac9743d9f08ce0ea`
+`854aa12e5f43720d2ee3e08b6922bc85e1e6f70e`
 
-C1 proves `setup_command_line()` through genuine return with the exact
-published command-line copies.
+N1R1 proves `setup_nr_cpu_ids()` through genuine return with the accepted exact
+eight-CPU state.
 
 ## Current next boundary
 
-`setup_per_cpu_areas()`.
+`smp_prepare_boot_cpu()`.
 
-Do not cross it until its bounded phase plan has been independently accepted.
+The accepted P2 plan must stop before `early_numa_node_init()`.
 
 ## Framebuffer evidence model
 
