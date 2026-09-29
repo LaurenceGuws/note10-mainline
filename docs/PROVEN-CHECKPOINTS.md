@@ -20,28 +20,28 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
+`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
 
-It physically proves `early_numa_node_init()` through genuine return and exact
-runtime NUMA-node publication for every possible CPU0..7.
+It physically proves `boot_cpu_hotplug_init()` through genuine return and exact
+public CPU0-only booted-once publication.
 
-NH1 preserved the proven P2 framebuffer bridge, painted RED immediately after
-the unchanged target returned, directly checked runtime `numa_node` for all
-eight CPUs, freshly reloaded the framebuffer bridge, and painted CYAN only
-after all eight values were exactly zero.
+NH2 preserved the proven NH1 framebuffer bridge, painted YELLOW immediately
+after the unchanged target returned, directly checked all eight 64-bit words of
+`cpus_booted_once_mask`, revalidated the CPU0 runtime per-CPU base, freshly
+reloaded the framebuffer bridge, and painted MAGENTA / PINK only after all
+public postconditions passed.
 
-Captain reported the decoded CYAN meaning and the accepted stability gate
-passed.
+Captain reported the decoded MAGENTA / PINK PASS meaning.
 
-The checkpoint remains installed.
+The accepted NH1/NH2 phase is complete and this checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
+`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
 
-The previous checkpoint is P2 WHITE. It proves `smp_prepare_boot_cpu()` through
-genuine return with `TPIDR_EL1 == __per_cpu_offset[0]` and stops before
-`early_numa_node_init()`.
+The previous checkpoint is NH1 CYAN. It proves `early_numa_node_init()` through
+genuine return with runtime `numa_node == 0` for possible CPU0..7 and stops
+before `boot_cpu_hotplug_init()`.
 
 ### Android RECOVERY checkpoint
 

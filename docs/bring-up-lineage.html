@@ -39,10 +39,13 @@ h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
 <div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning">Returned, but one or more runtime CPU0..7 NUMA-node values were not 0, or the fresh bridge check failed.</div></div>
 <div class="row"><div class="color" style="background:#00ffff"></div><div class="name">CYAN<br><code>#00ffff</code></div><div class="meaning">NH1 PASS. Runtime <code>numa_node</code> is 0 for CPU0..7.</div></div>
 
-<h2>Current NH2 candidate · boot_cpu_hotplug_init()</h2>
+<h2>Proven NH2 · boot_cpu_hotplug_init()</h2>
 <div class="row"><div class="color" style="background:#00ffff"></div><div class="name">CYAN<br><code>#00ffff</code></div><div class="meaning"><code>boot_cpu_hotplug_init()</code> did not genuinely return.</div></div>
 <div class="row"><div class="color" style="background:#ffff00"></div><div class="name">YELLOW<br><code>#ffff00</code></div><div class="meaning">Returned, but the booted-once mask, CPU0 per-CPU continuity, or fresh bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#ff00ff"></div><div class="name">MAGENTA / PINK<br><code>#ff00ff</code></div><div class="meaning">NH2 PASS. Boot CPU0 hotplug initialization returned and the public booted-once mask is CPU0-only.</div></div>
+
+<h2>Next boundary</h2>
+<p><code>print_kernel_cmdline(saved_command_line)</code> is next. Its physical decoder is not assigned until its phase plan is accepted.</p>
 
 </body>
 </html>

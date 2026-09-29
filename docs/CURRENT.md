@@ -4,48 +4,49 @@
 
 Kernel commit:
 
-`8498fcece358e77f29873dc6f27ba0828a5259ab`
+`e7f654eec7cf60845aa6a5ba1069f0978e9c9526`
 
 BOOT:
 
-`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
+`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
 
-Proven boundary: `early_numa_node_init()` genuinely returned and runtime
-`numa_node` publication for CPU0..7 validated.
+Proven boundary: `boot_cpu_hotplug_init()` genuinely returned and the public
+booted-once mask validated as CPU0-only.
 
-NH1 physically settled on CYAN `0xff00ffff` and the accepted stability gate
-passed.
+NH2 physically settled on MAGENTA / PINK `0xffff00ff` and Captain reported
+the decoded PASS meaning.
 
 That proves:
 
-- the proven P2 CPU0 runtime per-CPU base handoff remained intact;
-- `early_numa_node_init()` genuinely returned;
-- runtime `per_cpu(numa_node, cpu) == 0` for every possible CPU0..7;
+- promoted NH1 runtime NUMA publication remained intact;
+- `boot_cpu_hotplug_init()` genuinely returned;
+- `cpus_booted_once_mask` is exactly `0x1,0,0,0,0,0,0,0`;
+- `TPIDR_EL1 == __per_cpu_offset[0]` still held after the target;
 - a fresh `note10_paging_bridge` load remained non-NULL and writable;
-- `boot_cpu_hotplug_init()` did not execute.
+- `print_kernel_cmdline(saved_command_line)` did not execute.
 
-The production `early_numa_node_init()` and `early_cpu_to_node()` records
-remained function-relative exact versus promoted P2.
+The production `boot_cpu_hotplug_init()` remained exact versus promoted NH1
+at 66 instructions / 8 relocations. Its linked body retains the CPU0 mask set
+and the internal boot-CPU hotplug state writes before genuine return.
 
 ## Previous proven MAINLINE
 
-P2:
+NH1:
 
-`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
+`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
 
 Kernel source:
 
-`fe03932bd4c34e1d54344926fa3df8203e909a23`
+`8498fcece358e77f29873dc6f27ba0828a5259ab`
 
-P2 proves `smp_prepare_boot_cpu()` through genuine return with
-`TPIDR_EL1 == __per_cpu_offset[0]`.
+NH1 proves `early_numa_node_init()` through genuine return with runtime
+`numa_node == 0` for possible CPU0..7.
 
 ## Current next boundary
 
-`boot_cpu_hotplug_init()`.
-
-The accepted NH2 plan must stop before
 `print_kernel_cmdline(saved_command_line)`.
+
+Do not cross it until the next bounded phase plan has been independently accepted.
 
 ## Framebuffer evidence model
 
