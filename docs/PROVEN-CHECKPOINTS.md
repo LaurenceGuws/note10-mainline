@@ -20,28 +20,29 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
+`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
 
-It physically proves `boot_cpu_hotplug_init()` through genuine return and exact
-public CPU0-only booted-once publication.
+It physically proves the one-line `print_kernel_cmdline(saved_command_line)`
+path through genuine return and the immediately following second
+`parse_early_param()` through its exact `done == 1` fast return.
 
-NH2 preserved the proven NH1 framebuffer bridge, painted YELLOW immediately
-after the unchanged target returned, directly checked all eight 64-bit words of
-`cpus_booted_once_mask`, revalidated the CPU0 runtime per-CPU base, freshly
-reloaded the framebuffer bridge, and painted MAGENTA / PINK only after all
-public postconditions passed.
+CL1 preserved the proven NH2 framebuffer bridge, painted ORANGE immediately
+after the unchanged logging function returned, painted RED immediately after
+the unchanged early-param guard returned, directly rechecked the bounded saved
+command-line invariants and CPU0 per-CPU continuity, freshly reloaded the
+framebuffer bridge, and painted GREEN only after all checks passed.
 
-Captain reported the decoded MAGENTA / PINK PASS meaning.
+Captain reported the decoded GREEN CL1 PASS meaning.
 
-The accepted NH1/NH2 phase is complete and this checkpoint remains installed.
+The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
+`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
 
-The previous checkpoint is NH1 CYAN. It proves `early_numa_node_init()` through
-genuine return with runtime `numa_node == 0` for possible CPU0..7 and stops
-before `boot_cpu_hotplug_init()`.
+The previous checkpoint is NH2 MAGENTA/PINK. It proves
+`boot_cpu_hotplug_init()` through genuine return with exact CPU0-only public
+booted-once state and stops before `print_kernel_cmdline(saved_command_line)`.
 
 ### Android RECOVERY checkpoint
 

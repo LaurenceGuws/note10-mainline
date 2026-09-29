@@ -44,11 +44,14 @@ h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
 <div class="row"><div class="color" style="background:#ffff00"></div><div class="name">YELLOW<br><code>#ffff00</code></div><div class="meaning">Returned, but the booted-once mask, CPU0 per-CPU continuity, or fresh bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#ff00ff"></div><div class="name">MAGENTA / PINK<br><code>#ff00ff</code></div><div class="meaning">NH2 PASS. Boot CPU0 hotplug initialization returned and the public booted-once mask is CPU0-only.</div></div>
 
-<h2>Current CL1 candidate · command-line log + early-param guard</h2>
+<h2>Proven CL1 · command-line log + early-param guard</h2>
 <div class="row"><div class="color" style="background:#ff00ff"></div><div class="name">MAGENTA / PINK<br><code>#ff00ff</code></div><div class="meaning"><code>print_kernel_cmdline()</code> did not genuinely return.</div></div>
 <div class="row"><div class="color" style="background:#ff7f50"></div><div class="name">ORANGE / CORAL<br><code>#ff7f50</code></div><div class="meaning">Command-line logging returned, but the second <code>parse_early_param()</code> did not genuinely return.</div></div>
 <div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning">Both calls returned, but saved-command-line, CPU0 per-CPU continuity, or fresh bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning">CL1 PASS. One-line command-line logging returned, the second early-param call fast-returned, and the bounded continuity checks passed.</div></div>
+
+<h2>Next boundary</h2>
+<p><code>parse_args("Booting kernel", static_command_line, ...)</code> is next. Its physical decoder is not assigned until its phase plan is accepted.</p>
 
 </body>
 </html>

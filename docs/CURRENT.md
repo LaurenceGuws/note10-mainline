@@ -4,47 +4,51 @@
 
 Kernel commit:
 
-`e7f654eec7cf60845aa6a5ba1069f0978e9c9526`
+`6fe546b731b7b615c17862439812b195cedbf420`
 
 BOOT:
 
-`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
+`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
 
-Proven boundary: `boot_cpu_hotplug_init()` genuinely returned and the public
-booted-once mask validated as CPU0-only.
+Proven boundary: one-line `print_kernel_cmdline(saved_command_line)` returned,
+then the second `parse_early_param()` returned through its already-established
+`done == 1` fast path.
 
-NH2 physically settled on MAGENTA / PINK `0xffff00ff` and Captain reported
-the decoded PASS meaning.
+CL1 physically settled on GREEN `0xff00ff00` and Captain reported the decoded
+PASS meaning.
 
 That proves:
 
-- promoted NH1 runtime NUMA publication remained intact;
-- `boot_cpu_hotplug_init()` genuinely returned;
-- `cpus_booted_once_mask` is exactly `0x1,0,0,0,0,0,0,0`;
-- `TPIDR_EL1 == __per_cpu_offset[0]` still held after the target;
-- a fresh `note10_paging_bridge` load remained non-NULL and writable;
-- `print_kernel_cmdline(saved_command_line)` did not execute.
+- promoted NH2 boot-CPU hotplug state remained intact;
+- `print_kernel_cmdline()` genuinely returned;
+- the exact 133-byte saved command line took the unchanged one-line logging path;
+- the second `parse_early_param()` genuinely returned;
+- its exact pre-state was `done == 1`, so it did not parse early options again;
+- `saved_command_line` remained non-NULL;
+- `saved_command_line_len == 133` and byte 133 remained NUL;
+- `TPIDR_EL1 == __per_cpu_offset[0]` still held;
+- a fresh `note10_paging_bridge` remained non-NULL and writable;
+- the first real `parse_args("Booting kernel", ...)` did not execute.
 
-The production `boot_cpu_hotplug_init()` remained exact versus promoted NH1
-at 66 instructions / 8 relocations. Its linked body retains the CPU0 mask set
-and the internal boot-CPU hotplug state writes before genuine return.
+The production `print_kernel_cmdline()` and `parse_early_param()` remained
+function-relative exact versus promoted NH2.
 
 ## Previous proven MAINLINE
 
-NH1:
+NH2:
 
-`4734a2bd0d20ef81c5d63141bda90e7b606a8bf902a0f34b1f1c81c109848655`
+`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
 
 Kernel source:
 
-`8498fcece358e77f29873dc6f27ba0828a5259ab`
+`e7f654eec7cf60845aa6a5ba1069f0978e9c9526`
 
-NH1 proves `early_numa_node_init()` through genuine return with runtime
-`numa_node == 0` for possible CPU0..7.
+NH2 proves `boot_cpu_hotplug_init()` through genuine return with public
+`cpus_booted_once_mask == 0x1,0,0,0,0,0,0,0` and CPU0 per-CPU continuity.
 
 ## Current next boundary
 
-`print_kernel_cmdline(saved_command_line)`.
+`parse_args("Booting kernel", static_command_line, ...)`.
 
 Do not cross it until the next bounded phase plan has been independently accepted.
 
