@@ -20,27 +20,27 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
+`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
 
-It physically proves `setup_per_cpu_areas()` through genuine return and the
-directly verified runtime per-CPU publication for CPU0..7.
+It physically proves `smp_prepare_boot_cpu()` through genuine return and the
+CPU0 runtime per-CPU base handoff.
 
-P1 preserved the proven N1 state, called the unchanged production percpu path,
-painted RED immediately after genuine return, directly checked all eight
-published offsets, freshly reloaded the framebuffer bridge, and painted GREEN
-only after those checks passed.
+P2 preserved the proven P1 framebuffer bridge, painted BLUE immediately after
+the unchanged target returned, directly read `TPIDR_EL1`, directly compared it
+with `__per_cpu_offset[0]`, freshly reloaded the framebuffer bridge, and
+painted WHITE only after the handoff check passed.
 
-Captain observed stable GREEN `0xff00ff00` for the accepted three-minute rule.
+Captain observed stable WHITE `0xffffffff` for the accepted three-minute rule.
 
-The checkpoint remains installed.
+The accepted P1/P2 phase is complete and this checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
+`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
 
-The previous checkpoint is N1R1 CORAL / ORANGE. It proves
-`setup_nr_cpu_ids()` through genuine return with exact eight-CPU state and
-stops before `setup_per_cpu_areas()`.
+The previous checkpoint is P1 GREEN. It proves `setup_per_cpu_areas()`
+through genuine return with exact CPU0..7 runtime offset publication and stops
+before `smp_prepare_boot_cpu()`.
 
 ### Android RECOVERY checkpoint
 

@@ -4,52 +4,47 @@
 
 Kernel commit:
 
-`a08d512a731a802f9ebc52c515a8254193b82790`
+`fe03932bd4c34e1d54344926fa3df8203e909a23`
 
 BOOT:
 
-`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
+`225485e165989cfd7b72f333531230db1409b53478b2023fa5d5ec6e684db719`
 
-Proven boundary: `setup_per_cpu_areas()` genuinely returned and the runtime
-per-CPU publication for CPU0..7 validated.
+Proven boundary: `smp_prepare_boot_cpu()` genuinely returned and the boot CPU
+runtime per-CPU base handoff validated.
 
-P1 physically settled on GREEN `0xff00ff00` for the accepted three-minute
+P2 physically settled on WHITE `0xffffffff` for the accepted three-minute
 window.
 
 That proves:
 
-- the exact proven N1R1 state remained intact through the target entry;
-- `setup_per_cpu_areas()` genuinely returned;
-- fresh `pcpu_base_addr` was non-NULL;
-- fresh `pcpu_unit_offsets` was non-NULL;
-- for CPU0..7, `__per_cpu_offset[cpu]` exactly matched
-  `((unsigned long)pcpu_base_addr - (unsigned long)__per_cpu_start) +
-  pcpu_unit_offsets[cpu]`;
+- the proven P1 runtime per-CPU publication remained intact;
+- `smp_prepare_boot_cpu()` genuinely returned;
+- the post-return `TPIDR_EL1` value exactly matched `__per_cpu_offset[0]`;
 - a fresh `note10_paging_bridge` load remained non-NULL and writable;
-- `smp_prepare_boot_cpu()` did not execute.
+- `early_numa_node_init()` did not execute.
 
-The production percpu implementation remained unchanged from proven N1R1.
-P1 does not claim whether the embed allocator succeeded directly or the
-supported page allocator fallback was used.
+The production `smp_prepare_boot_cpu()`, `cpuinfo_store_boot_cpu()`, and
+`setup_boot_cpu_features()` records remained exact versus promoted P1.
 
 ## Previous proven MAINLINE
 
-N1R1:
+P1:
 
-`1a68d65504697c20e5dea7027e8afa38fa25f4bf772012b05f8789ca19782171`
+`906cc6e762260a4adef6eaecfaee05db6b3dbecaf752c525401630639fdb67b9`
 
 Kernel source:
 
-`854aa12e5f43720d2ee3e08b6922bc85e1e6f70e`
+`a08d512a731a802f9ebc52c515a8254193b82790`
 
-N1R1 proves `setup_nr_cpu_ids()` through genuine return with the accepted exact
-eight-CPU state.
+P1 proves `setup_per_cpu_areas()` through genuine return and exact CPU0..7
+runtime per-CPU publication.
 
 ## Current next boundary
 
-`smp_prepare_boot_cpu()`.
+`early_numa_node_init()`.
 
-The accepted P2 plan must stop before `early_numa_node_init()`.
+Do not cross it until the next bounded phase plan has been independently accepted.
 
 ## Framebuffer evidence model
 

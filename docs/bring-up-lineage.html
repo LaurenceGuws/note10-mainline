@@ -29,10 +29,13 @@ h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
 <div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning">Returned, but direct per-CPU publication or fresh bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning">P1 PASS. CPU0..7 runtime offsets validated.</div></div>
 
-<h2>Current P2 candidate · smp_prepare_boot_cpu()</h2>
+<h2>Proven P2 · smp_prepare_boot_cpu()</h2>
 <div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning"><code>smp_prepare_boot_cpu()</code> did not genuinely return.</div></div>
-<div class="row"><div class="color" style="background:#0000ff"></div><div class="name">BLUE<br><code>#0000ff</code></div><div class="meaning">Returned, but <code>TPIDR_EL1</code> did not equal the published CPU0 runtime offset or the fresh bridge check failed.</div></div>
-<div class="row"><div class="color" style="background:#ffffff"></div><div class="name" style="color:#fff">WHITE<br><code>#ffffff</code></div><div class="meaning">P2 PASS. CPU0 is on the runtime per-CPU base.</div></div>
+<div class="row"><div class="color" style="background:#0000ff"></div><div class="name">BLUE<br><code>#0000ff</code></div><div class="meaning">Returned, but the CPU0 runtime per-CPU base handoff or fresh bridge validation failed.</div></div>
+<div class="row"><div class="color" style="background:#ffffff"></div><div class="name">WHITE<br><code>#ffffff</code></div><div class="meaning">P2 PASS. <code>TPIDR_EL1 == __per_cpu_offset[0]</code>.</div></div>
+
+<h2>Next boundary</h2>
+<p><code>early_numa_node_init()</code> is next. Its physical decoder is not assigned until its phase plan is accepted.</p>
 
 </body>
 </html>
