@@ -63,7 +63,7 @@ h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
 <div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN · RI1 PASS<br><code>#00ff00</code></div><div class="meaning">Early random input was mixed. RNG was not initialized before RI1 and became initialized during RI1.</div></div>
 <div class="row"><div class="color" style="background:#ff00ff"></div><div class="name">MAGENTA / PINK · RI1 PASS<br><code>#ff00ff</code></div><div class="meaning">Early random input was mixed. RNG was already initialized before RI1 and remained initialized; the unchanged target followed its ready/reseed lane.</div></div>
 
-<h2>Current frozen LB1 candidate · dynamic printk log buffer</h2>
+<h2>Promoted LB1 · dynamic printk log buffer</h2>
 <div class="row"><div class="color" style="background:#ffff00"></div><div class="name">YELLOW<br><code>#ffff00</code></div><div class="meaning">The exact LB1 pre-state failed: public printk buffer was not the expected non-NULL 128 KiB static ring, interrupts were not still disabled, CPU0 continuity failed, or the fresh framebuffer bridge was invalid. <code>setup_log_buf(0)</code> was not entered.</div></div>
 <div class="row"><div class="color" style="background:#ffffff"></div><div class="name">WHITE<br><code>#ffffff</code></div><div class="meaning">The exact LB1 pre-state passed, but <code>setup_log_buf(0)</code> did not genuinely return.</div></div>
 <div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning"><code>setup_log_buf(0)</code> returned, but the public dynamic-ring transition, interrupt state, CPU0 continuity, or fresh final bridge validation failed.</div></div>
