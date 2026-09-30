@@ -4,51 +4,55 @@
 
 Kernel commit:
 
-`6fe546b731b7b615c17862439812b195cedbf420`
+`3b04b5a9a9e53431a2bcfaf5e0254cc0d36b097d`
 
 BOOT:
 
-`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
+`072408ec313851f9d66f69c21efc235ff3f037febf33fc88aa105f2ac5d90b84`
 
-Proven boundary: one-line `print_kernel_cmdline(saved_command_line)` returned,
-then the second `parse_early_param()` returned through its already-established
-`done == 1` fast path.
+Proven boundary: the first real `parse_args("Booting kernel",
+static_command_line, ...)` returned with the exact seven-token effects,
+`print_unknown_bootoptions()` returned, both following init-argument parser
+guards skipped their nested parser calls, and CPU0 per-CPU continuity remained
+valid.
 
-CL1 physically settled on GREEN `0xff00ff00` and Captain reported the decoded
+KP1 physically settled on WHITE `0xffffffff` and Captain reported the decoded
 PASS meaning.
 
 That proves:
 
-- promoted NH2 boot-CPU hotplug state remained intact;
-- `print_kernel_cmdline()` genuinely returned;
-- the exact 133-byte saved command line took the unchanged one-line logging path;
-- the second `parse_early_param()` genuinely returned;
-- its exact pre-state was `done == 1`, so it did not parse early options again;
-- `saved_command_line` remained non-NULL;
-- `saved_command_line_len == 133` and byte 133 remained NUL;
+- promoted CL1 command-line logging and early-param guard state remained intact;
+- the main Booting-kernel parser genuinely returned;
+- `after_dashes == NULL` and `panic_later == NULL`;
+- `execute_command == "/init"` and `argv_init[1] == NULL`;
+- `envp_init[2] == "pmos_root=/dev/sda32"` and `envp_init[3] == NULL`;
+- `console_set_on_cmdline == 1`;
+- exact built-in `scsi_mod.max_luns=1` was accepted through unchanged parameter code;
+- `print_unknown_bootoptions()` genuinely returned;
+- the Setting-init-args and Setting-extra-init-args parser calls did not execute;
 - `TPIDR_EL1 == __per_cpu_offset[0]` still held;
 - a fresh `note10_paging_bridge` remained non-NULL and writable;
-- the first real `parse_args("Booting kernel", ...)` did not execute.
+- `random_init_early(command_line)` did not execute.
 
-The production `print_kernel_cmdline()` and `parse_early_param()` remained
-function-relative exact versus promoted NH2.
+All six production functions reviewed for KP1 remained semantically
+function-relative exact versus promoted CL1.
 
 ## Previous proven MAINLINE
 
-NH2:
+CL1:
 
-`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
+`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
 
 Kernel source:
 
-`e7f654eec7cf60845aa6a5ba1069f0978e9c9526`
+`6fe546b731b7b615c17862439812b195cedbf420`
 
-NH2 proves `boot_cpu_hotplug_init()` through genuine return with public
-`cpus_booted_once_mask == 0x1,0,0,0,0,0,0,0` and CPU0 per-CPU continuity.
+CL1 proves one-line command-line logging through genuine return and the
+second `parse_early_param()` through exact `done == 1` fast return.
 
 ## Current next boundary
 
-`parse_args("Booting kernel", static_command_line, ...)`.
+`random_init_early(command_line)`.
 
 Do not cross it until the next bounded phase plan has been independently accepted.
 

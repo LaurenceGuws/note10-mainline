@@ -50,11 +50,14 @@ h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
 <div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning">Both calls returned, but saved-command-line, CPU0 per-CPU continuity, or fresh bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning">CL1 PASS. One-line command-line logging returned, the second early-param call fast-returned, and the bounded continuity checks passed.</div></div>
 
-<h2>Current frozen KP1 candidate · Booting-kernel parameter handoff</h2>
+<h2>Proven KP1 · Booting-kernel parameter handoff</h2>
 <div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN<br><code>#00ff00</code></div><div class="meaning">The main <code>parse_args("Booting kernel", ...)</code> did not genuinely return.</div></div>
 <div class="row"><div class="color" style="background:#0000ff"></div><div class="name">BLUE<br><code>#0000ff</code></div><div class="meaning">The main parser returned, but exact parse-state validation failed, or <code>print_unknown_bootoptions()</code> did not genuinely return.</div></div>
 <div class="row"><div class="color" style="background:#ff7f50"></div><div class="name">ORANGE / CORAL<br><code>#ff7f50</code></div><div class="meaning">Parser state and reporting returned, but init-argument skip-path, CPU0 continuity, or final bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#ffffff"></div><div class="name">WHITE<br><code>#ffffff</code></div><div class="meaning">KP1 PASS. Main command-line parsing, exact seven-token effects, unknown-option reporting, and both init-argument skip guards completed; CPU0 continuity remained valid.</div></div>
+
+<h2>Next boundary</h2>
+<p><code>random_init_early(command_line)</code> is next. Its physical decoder is not assigned until its phase plan is accepted.</p>
 
 </body>
 </html>

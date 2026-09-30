@@ -20,29 +20,30 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
+`072408ec313851f9d66f69c21efc235ff3f037febf33fc88aa105f2ac5d90b84`
 
-It physically proves the one-line `print_kernel_cmdline(saved_command_line)`
-path through genuine return and the immediately following second
-`parse_early_param()` through its exact `done == 1` fast return.
+It physically proves the first real `parse_args("Booting kernel", ...)` through
+genuine return with the exact seven-token state, then
+`print_unknown_bootoptions()` through genuine return and the two following
+init-argument parser guards through their deterministic skip paths.
 
-CL1 preserved the proven NH2 framebuffer bridge, painted ORANGE immediately
-after the unchanged logging function returned, painted RED immediately after
-the unchanged early-param guard returned, directly rechecked the bounded saved
-command-line invariants and CPU0 per-CPU continuity, freshly reloaded the
-framebuffer bridge, and painted GREEN only after all checks passed.
+KP1 painted BLUE immediately after the main parser returned, directly checked
+the exact parse state, painted ORANGE/CORAL immediately after the unchanged
+reporting helper returned, revalidated the skip path and CPU0 continuity, then
+freshly reloaded the framebuffer bridge and painted WHITE only after every
+postcondition passed.
 
-Captain reported the decoded GREEN CL1 PASS meaning.
+Captain reported the decoded WHITE KP1 PASS meaning.
 
 The checkpoint remains installed.
 
 Previous proven MAINLINE checkpoint:
 
-`0e5e5c2c61857f8648bd24c6a4aa9a742ed241a50df6295c168039b261be4974`
+`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
 
-The previous checkpoint is NH2 MAGENTA/PINK. It proves
-`boot_cpu_hotplug_init()` through genuine return with exact CPU0-only public
-booted-once state and stops before `print_kernel_cmdline(saved_command_line)`.
+The previous checkpoint is CL1 GREEN. It proves one-line command-line logging
+through genuine return and the second `parse_early_param()` through exact
+`done == 1` fast return, stopping before the first real Booting-kernel parser.
 
 ### Android RECOVERY checkpoint
 
