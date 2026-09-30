@@ -75,5 +75,11 @@ h1{margin:0 0 8px} h2{margin:32px 0 8px} p{color:#aaa;margin:0 0 24px}
 <div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning"><code>vfs_caches_init_early()</code> returned, but <code>hashdist</code>, interrupt state, CPU0 continuity, or fresh final bridge validation failed.</div></div>
 <div class="row"><div class="color" style="background:#0000ff"></div><div class="name">BLUE · VFS1 PASS<br><code>#0000ff</code></div><div class="meaning"><code>vfs_caches_init_early()</code> returned with runtime <code>hashdist</code> still false, interrupts still disabled, CPU0 continuity intact, and a valid fresh final bridge. With unchanged production semantics, the 8 KiB in-lookup initialization and successful early Dentry/Inode hash allocation paths completed.</div></div>
 
+<h2>Current frozen ET1 candidate · exception table + trap</h2>
+<div class="row"><div class="color" style="background:#ffff00"></div><div class="name">YELLOW<br><code>#ffff00</code></div><div class="meaning">The exact ET1 pre-state failed: interrupts were not still disabled, CPU0 continuity failed, or the fresh framebuffer bridge was invalid. Neither target call was entered.</div></div>
+<div class="row"><div class="color" style="background:#ffffff"></div><div class="name">WHITE<br><code>#ffffff</code></div><div class="meaning">The exact ET1 pre-state passed, but <code>sort_main_extable()</code> did not genuinely return.</div></div>
+<div class="row"><div class="color" style="background:#ff0000"></div><div class="name">RED<br><code>#ff0000</code></div><div class="meaning"><code>sort_main_extable()</code> returned, but ET1 did not complete through <code>trap_init()</code> and the bounded IRQ/CPU0/final-bridge checks.</div></div>
+<div class="row"><div class="color" style="background:#00ff00"></div><div class="name">GREEN · ET1 PASS<br><code>#00ff00</code></div><div class="meaning"><code>sort_main_extable()</code> returned on the already build-time-sorted / flag-zero lane, the exact one-instruction <code>trap_init()</code> returned, interrupts remained disabled, CPU0 continuity remained intact, and the fresh final bridge was valid.</div></div>
+
 </body>
 </html>
