@@ -55,7 +55,7 @@ ancestry.
 
 ## Current next boundary
 
-The first page-derived work inside `__free_pages_prepare()`.
+The stop-false `__free_pages_ok()` front porch: production `page_to_pfn(page)` and `page_zone(page)` materialization, then entry into the inlined `__free_pages_prepare()` prefix.
 
 A fresh bounded phase plan is required before crossing that boundary.
 

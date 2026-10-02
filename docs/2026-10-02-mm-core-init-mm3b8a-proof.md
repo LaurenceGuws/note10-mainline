@@ -164,5 +164,4 @@ Result: **PASS**.
 
 MM3B8A is promoted to MAINLINE and remains installed.
 
-The next unexecuted production boundary is the first page-derived work inside
-`__free_pages_prepare()`.
+The next unexecuted production work is the stop-false `__free_pages_ok()` front porch: production `page_to_pfn(page)` / `page_zone(page)` materialization followed by the inlined `__free_pages_prepare()` prefix.

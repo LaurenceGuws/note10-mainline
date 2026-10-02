@@ -88,7 +88,6 @@ stop before any page-derived preparation work. No `__free_pages_prepare()`,
 `free_one_page()`, `__free_one_page()`, or buddy insertion executes on the
 proven lane.
 
-The next unexecuted production boundary is the first page-derived work inside
-`__free_pages_prepare()`.
+The next unexecuted production work is the stop-false `__free_pages_ok()` front porch: materialize `page_to_pfn(page)` and `page_zone(page)`, then enter the inlined `__free_pages_prepare()` prefix.
 
 See `docs/CURRENT.md` and `docs/2026-10-02-mm-core-init-mm3b8a-proof.md`.
