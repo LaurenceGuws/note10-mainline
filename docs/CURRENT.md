@@ -4,57 +4,60 @@
 
 Kernel commit:
 
-`3b04b5a9a9e53431a2bcfaf5e0254cc0d36b097d`
+`2990c6f85ccf844a9712c05cd941425efdfab01e`
 
 BOOT:
 
-`072408ec313851f9d66f69c21efc235ff3f037febf33fc88aa105f2ac5d90b84`
+`33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
 
-Proven boundary: the first real `parse_args("Booting kernel",
-static_command_line, ...)` returned with the exact seven-token effects,
-`print_unknown_bootoptions()` returned, both following init-argument parser
-guards skipped their nested parser calls, and CPU0 per-CPU continuity remained
-valid.
+Promoted checkpoint: **MM3B8A BLUE**.
 
-KP1 physically settled on WHITE `0xffffffff` and Captain reported the decoded
-PASS meaning.
+The complete promoted MM3B7 release traversal now genuinely calls and enters
+`__free_pages_ok()` for every processed chunk. Final machine code loads/tests a
+persistent frozen entry-stop byte before the first page-derived operation, and
+frozen true returns directly through the ordinary epilogue.
 
-That proves:
+Captain reported the decoded BLUE `#0000ff` PASS meaning.
 
-- promoted CL1 command-line logging and early-param guard state remained intact;
-- the main Booting-kernel parser genuinely returned;
-- `after_dashes == NULL` and `panic_later == NULL`;
-- `execute_command == "/init"` and `argv_init[1] == NULL`;
-- `envp_init[2] == "pmos_root=/dev/sda32"` and `envp_init[3] == NULL`;
-- `console_set_on_cmdline == 1`;
-- exact built-in `scsi_mod.max_luns=1` was accepted through unchanged parameter code;
-- `print_unknown_bootoptions()` genuinely returned;
-- the Setting-init-args and Setting-extra-init-args parser calls did not execute;
-- `TPIDR_EL1 == __per_cpu_offset[0]` still held;
-- a fresh `note10_paging_bridge` remained non-NULL and writable;
-- `random_init_early(command_line)` did not execute.
+This proves:
 
-All six production functions reviewed for KP1 remained semantically
-function-relative exact versus promoted CL1.
+- complete free-range/chunk traversal still exhausts with nonzero pages;
+- every processed page completes early metadata normalization;
+- every processed chunk completes production per-zone managed-page publication;
+- every processed chunk genuinely calls and enters `__free_pages_ok()`;
+- ordinary call/entry/prologue/return plumbing completes for every invocation;
+- no page-derived preparation work executes on the frozen true path;
+- no inlined `__free_pages_prepare()` work executes;
+- no `free_one_page()`, `__free_one_page()`, or buddy insertion executes from this path;
+- the wrapper returns before global `_totalram_pages` publication;
+- the outer stop returns before `mem_init()`;
+- global `totalram_pages() == 0` and slab remains unavailable;
+- IRQ-disabled state, CPU0 continuity, and the fresh framebuffer bridge survive.
 
-## Previous proven MAINLINE
+See `2026-10-02-mm-core-init-mm3b8a-proof.md`.
 
-CL1:
+## Immediate rollback
 
-`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
+Previous promoted MM3B7 BOOT:
+
+`0dba62ce0f0ff5042e5ed0ad1523db51fdf15de7db50cafd69dad9e9ceed3ba9`
 
 Kernel source:
 
-`6fe546b731b7b615c17862439812b195cedbf420`
+`020dd90be78531638adba1c3a03b06133c11cfc4`
 
-CL1 proves one-line command-line logging through genuine return and the
-second `parse_early_param()` through exact `done == 1` fast return.
+## Rejected diagnostic
+
+MM3B8 source `4d9b5880ba9c55b71b8c19ee627035ef5eb5ecc9` / BOOT
+`91a0a62b4dc66fca464a74a9d8d2f07decd62efd3b2ba97807af5ad1a1f54e8e`
+settled on WHITE and is non-promotable. It is not in the current promoted
+ancestry.
 
 ## Current next boundary
 
-`random_init_early(command_line)`.
+The first page-derived work inside `__free_pages_prepare()`.
 
-Do not cross it until the next bounded phase plan has been independently accepted.
+A fresh bounded phase plan is required before crossing that boundary.
 
 ## Framebuffer evidence model
 

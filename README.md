@@ -75,12 +75,20 @@ Generated binaries and compiler build trees do not belong in Git.
 
 Current proven kernel source:
 
-`16f5becb8d1e0116f7a070e3ac9743d9f08ce0ea`
+`2990c6f85ccf844a9712c05cd941425efdfab01e`
 
 Current proven BOOT:
 
-`89373f9ba86dfffa0d998a6bfbc87270de941594c493826f42f061fcbcefafbf`
+`33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
 
-This proves `setup_command_line()` return and its accepted postconditions. The next `setup_nr_cpu_ids()` experiment failed its physical CORAL gate and is not promoted.
+MM3B8A physically passed BLUE `#0000ff`. It proves the complete promoted
+MM3B7 memory-release traversal genuinely calls and enters `__free_pages_ok()`
+for every processed chunk and returns through a frozen first-operation entry
+stop before any page-derived preparation work. No `__free_pages_prepare()`,
+`free_one_page()`, `__free_one_page()`, or buddy insertion executes on the
+proven lane.
 
-See `docs/CURRENT.md`.
+The next unexecuted production boundary is the first page-derived work inside
+`__free_pages_prepare()`.
+
+See `docs/CURRENT.md` and `docs/2026-10-02-mm-core-init-mm3b8a-proof.md`.

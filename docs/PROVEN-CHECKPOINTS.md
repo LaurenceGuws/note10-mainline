@@ -20,30 +20,29 @@ mainline tranche.
 
 Current promoted MAINLINE checkpoint:
 
-`072408ec313851f9d66f69c21efc235ff3f037febf33fc88aa105f2ac5d90b84`
+`33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
 
-It physically proves the first real `parse_args("Booting kernel", ...)` through
-genuine return with the exact seven-token state, then
-`print_unknown_bootoptions()` through genuine return and the two following
-init-argument parser guards through their deterministic skip paths.
+Kernel source:
 
-KP1 painted BLUE immediately after the main parser returned, directly checked
-the exact parse state, painted ORANGE/CORAL immediately after the unchanged
-reporting helper returned, revalidated the skip path and CPU0 continuity, then
-freshly reloaded the framebuffer bridge and painted WHITE only after every
-postcondition passed.
+`2990c6f85ccf844a9712c05cd941425efdfab01e`
 
-Captain reported the decoded WHITE KP1 PASS meaning.
+MM3B8A BLUE physically proves the complete promoted MM3B7 release traversal can
+genuinely call and enter `__free_pages_ok()` for every processed chunk and
+return through a frozen first-operation entry stop before the first page-derived
+load. No `__free_pages_prepare()`, `free_one_page()`, `__free_one_page()`, or
+buddy insertion executes on the frozen lane. Per-zone managed pages remain
+published while global `_totalram_pages` stays zero, and the outer stop remains
+before `mem_init()`.
 
-The checkpoint remains installed.
+Captain reported the decoded BLUE `#0000ff` PASS meaning. The checkpoint remains
+installed.
 
 Previous proven MAINLINE checkpoint:
 
-`05322bfde93238932084fb16c96675b025648db7c7fa7d36bfeae62987e5861a`
+`0dba62ce0f0ff5042e5ed0ad1523db51fdf15de7db50cafd69dad9e9ceed3ba9`
 
-The previous checkpoint is CL1 GREEN. It proves one-line command-line logging
-through genuine return and the second `parse_early_param()` through exact
-`done == 1` fast return, stopping before the first real Booting-kernel parser.
+The previous checkpoint is MM3B7 CYAN. It proves complete metadata normalization
+and per-zone managed-page publication while stopping before `__free_pages_ok()`.
 
 ### Android RECOVERY checkpoint
 

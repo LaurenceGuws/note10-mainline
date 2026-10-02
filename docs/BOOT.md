@@ -1492,3 +1492,26 @@ This closes `setup_command_line()`. The next linked production boundary is
 `setup_nr_cpu_ids()`.
 
 See `docs/2026-09-28-setup-command-line-proof.md`.
+
+## Memory-core MM3B8A: `__free_pages_ok()` entry plumbing
+
+MM3B8A is the current promoted MAINLINE BOOT:
+
+`33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
+
+Kernel source:
+
+`2990c6f85ccf844a9712c05cd941425efdfab01e`
+
+It was packaged twice from exact promoted MM3B7 BOOT
+`0dba62ce0f0ff5042e5ed0ad1523db51fdf15de7db50cafd69dad9e9ceed3ba9`.
+Both loader builds and both BOOT packages were byte-identical. The candidate
+preserves the exact BOOT geometry, zero kernel-slot padding, parent ramdisk,
+post-ramdisk tail, and accepted AVB metadata/stale-descriptor behavior.
+
+Captain reported BLUE `#0000ff`. This promotes the exact candidate and proves
+`__free_pages_ok()` call/entry/prologue/entry-stop/return plumbing across the
+complete memblock release traversal, while still excluding all page-derived
+preparation and buddy insertion.
+
+See `docs/2026-10-02-mm-core-init-mm3b8a-proof.md`.
