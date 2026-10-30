@@ -8,3 +8,7 @@
 *.tar
 *.zip
 *.apk
+
+.zig-cache/
+zig-out/
+zig-pkg/
