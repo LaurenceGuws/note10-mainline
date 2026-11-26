@@ -73,21 +73,23 @@ Generated binaries and compiler build trees do not belong in Git.
 
 ## Current proven kernel boundary
 
-Current proven kernel source:
+Current proven kernel source: `5cecb81f77d7121c3370206f898ac50daacb2668`
 
-`2990c6f85ccf844a9712c05cd941425efdfab01e`
+Current proven BOOT: `42cdd5db65209346b2649bd3e58559d434b6008afc44feecc5c9a3bde03dd806`
 
-Current proven BOOT:
+MM3B8B1-P1 physically passed GREEN `#00ff00`, under the independently accepted
+fresh-boot full-slot decoder. The original B1 GOLD observation remains
+inconclusive. P1 preserves the exact B1 allocator semantics and reserves GREEN
+for the active success writer. Every processed chunk completes production PFN
+and zone materialization before the frozen first-semantic-operation preparation
+stop returns false. Complete range/chunk traversal, nonzero accumulation and
+per-zone managed-page publication survive. No preparation initializer/body or
+buddy insertion executes. Global totalram stays zero; slab unavailable, IRQs
+disabled, CPU0 continuity and fresh final bridge intact. Computed PFN/zone
+correctness or a new zone-pointer dereference are not claimed.
 
-`33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
+The next accepted checkpoint is MM3B8B2, covering the preparation initializers
+and false FPI_PREPARED guard. It must retain P1's cumulative obligations and
+permanent palette; no B3 operation may execute.
 
-MM3B8A physically passed BLUE `#0000ff`. It proves the complete promoted
-MM3B7 memory-release traversal genuinely calls and enters `__free_pages_ok()`
-for every processed chunk and returns through a frozen first-operation entry
-stop before any page-derived preparation work. No `__free_pages_prepare()`,
-`free_one_page()`, `__free_one_page()`, or buddy insertion executes on the
-proven lane.
-
-The next unexecuted production work is the stop-false `__free_pages_ok()` front porch: materialize `page_to_pfn(page)` and `page_zone(page)`, then enter the inlined `__free_pages_prepare()` prefix.
-
-See `docs/CURRENT.md` and `docs/2026-10-02-mm-core-init-mm3b8a-proof.md`.
+See `docs/CURRENT.md` and `docs/bring-up-lineage.html#mm3b8b1-p1`.
