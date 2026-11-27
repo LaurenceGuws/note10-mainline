@@ -2,27 +2,29 @@
 
 ## Proven MAINLINE
 
-Kernel commit: `82446e644a543b19c8c72ebd2e99864acb4e5a92`
+Kernel commit: `fe8cbddba495439664c2ca58a64b2bfff76efc8b`
 
-BOOT: `5deb82eb52f64057372d768c226a2ae9163324c76d82c7893f62dbe8ec159833`
+BOOT: `1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b`
 
-Promoted checkpoint: **MM3B8B2 GREEN** (2026-11-27).
+Promoted checkpoint: **MM3B8B3 GREEN** (2026-11-27).
 
-MM3B8B2 physically passed GREEN `#00ff00` under the independently accepted
-fresh-boot full-slot decoder. Every processed chunk completes P1 PFN/zone
-materialization, the preparation initializers (KASAN constant, init-on-free
-Boolean, compound test and folio value), the physical false FPI_PREPARED guard
-and frozen false return. Complete nonzero traversal and per-zone publication
-survive. The wrapper returns before global totalram publication and the outer
-stop before mem_init. Totalram remains zero, slab unavailable, IRQs disabled,
-CPU0 continuity and fresh bridge intact. No computed-pointer correctness or
-dereference, specific static-key/compound outcome, B3 work or buddy insertion
-is claimed.
+MM3B8B3 physically passed GREEN `#00ff00` under the independently accepted
+fresh-boot full-slot decoder. Every processed chunk completes cumulative B2
+obligations and the configured preparation prefix through the memcg condition,
+then returns false at the frozen stop. Independent source/linked review
+establishes the disabled memcg key and excludes its early enable path; the
+optional uncharge and its transitive effects do not execute. PageTail assertion,
+tracepoint and KMSAN are configuration-elided, not dynamically exercised.
+Complete nonzero traversal and per-zone publication survive. The wrapper
+returns before global totalram publication and the outer stop before mem_init.
+Totalram remains zero, slab unavailable, IRQs disabled, CPU0 continuity and
+fresh bridge intact. No computed-pointer correctness, specific initializer
+alternative, mlocked operation, later preparation or buddy insertion claimed.
 
-Next: MM3B8B3, covering the PageTail assertion/trace/KMSAN and conditional
-memcg-kmem prefix, stopping before the mlocked-specific load/test or effects.
-Config-elided operations remain described as such; runtime branches are
-path-scoped. Permanent GREEN decoder and cumulative obligations remain.
+Next: MM3B8B4, through the complete production mlocked block, stopping before
+any HWPoison-specific load/test. Both optimized mlocked outcomes must reach
+the frozen false-return boundary; no claim the taken branch actually ran
+without independent evidence. Permanent GREEN decoder remains.
 
 The release string remains deliberately pinned to original B1 as build
 metadata, not source identity. Detailed proof history is batched at phase end.
@@ -41,12 +43,14 @@ remains preserved on Home. Identical DER SHA256
 `44d337651ba5ec477b204a80582669c1e3c5a2b1af602c101f0ff8f05cd20d9e`.
 This is not PEM byte equality, no key generation/transport or module-signing
 authority. Recheck at every freeze; drift/signing reopens review.
+B3 independent review revalidated the bounded exception (verdict SHA256
+`fba60e0c200defbf4488b97def175d8a4f5186fcd7fda5306eddbce71620af57`).
 
 ## Immediate rollback
 
-Promoted MM3B8B1-P1 BOOT: `42cdd5db65209346b2649bd3e58559d434b6008afc44feecc5c9a3bde03dd806`
+Promoted MM3B8B2 BOOT: `5deb82eb52f64057372d768c226a2ae9163324c76d82c7893f62dbe8ec159833`
 
-Kernel source: `5cecb81f77d7121c3370206f898ac50daacb2668`
+Kernel source: `82446e644a543b19c8c72ebd2e99864acb4e5a92`
 
 Separate immutable Android recovery remains
 `1a78e5117cf23b3cab5547da2369018066c9ddac27307e97fce46026647ae2f9`.
@@ -65,4 +69,4 @@ are the reusable checkpoint slot. Only a uniform stable full-slot GREEN after
 a positively identified fresh exact candidate boot is PASS. YELLOW pre-fail,
 WHITE entered, RED returned/post-fail. Historical palettes are candidate-specific.
 
-See `bring-up-lineage.html#mm3b8b2`.
+See `bring-up-lineage.html#mm3b8b3`.
