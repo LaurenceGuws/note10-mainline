@@ -9,10 +9,9 @@ simplefb:
 - bytes/pixel: 4
 - scanline bytes: 0x1680 / 5760
 
-## Persistent early boot trail
+## Historical CAL1 early boot trail (pre-palette amendment)
 
-These bands are intentionally retained by the current `head.S` diagnostic
-sequence. Later markers overwrite only selected subranges, leaving a compact
+These bands were retained by the original `head.S` diagnostic sequence. Later markers overwrite only selected subranges, leaving a compact
 historical trail:
 
 - rows 512..575: MAGENTA
@@ -46,12 +45,17 @@ BLUE surviving.
 Therefore direct row addressing and overwrite visibility for the reusable slot
 are physically trustworthy at terminal hold.
 
-## Interpretation rule
+## Permanent active decoder (MM3B8B1-P1 and later)
 
-For future bring-up:
-- rows 512..671 are historical early-boot trail and should be ignored when
-  interpreting the current checkpoint;
-- only rows 672..703 are the current reusable checkpoint slot;
-- a stable final color in rows 672..703 is a valid final-state physical oracle;
-- transient colors while the slot is repainting are not phase evidence;
-- CAL1 itself is diagnostic-only and never promotable.
+All 83 inherited paint sites are opaque black or muted blue-dominant,
+including the trail in rows512..671. Historical colors above apply only to
+earlier exact BOOTs. The four active roles are YELLOW #ffff00 (pre-fail),
+WHITE #ffffff (entered/incomplete), RED #ff0000 (returned, postconditions not
+established), GREEN #00ff00 (success). Only a stable, uniform full-width
+GREEN in the whole calibrated rows672..703 slot on a positively identified
+fresh exact candidate boot from a known non-pass/Download Mode/reset state
+is promotable. No transient witness required. All other colors, partial
+band, green NOTICE glyphs, stale/reset/uncertain provenance are non-promotable.
+All existing writer and loader/reset-provenance gates remain. Historical
+decoder requirements, including original B1 GOLD, are not retroactively
+changed. See bring-up-lineage.html and the phase proof.

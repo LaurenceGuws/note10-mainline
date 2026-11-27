@@ -18,31 +18,30 @@ The newest exact BOOT that has passed:
 This is the normal progression parent and routine rollback target for the next
 mainline tranche.
 
-Current promoted MAINLINE checkpoint:
+Current promoted MAINLINE checkpoint (MM3B8B4 GREEN):
 
-`33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
+`7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
 
-Kernel source:
+Kernel source: `1a7581e134a5774fc009a8c9ee99905e700b5702`
 
-`2990c6f85ccf844a9712c05cd941425efdfab01e`
+R1 preparation-prefix phase complete. Every processed chunk completes the
+cumulative PFN/zone, initializer, physical prepared-false, disabled memcg
+condition and mlocked decision boundary, then returns false before
+HWPoison-specific work. Conditional mlocked accounting operations are
+qualified if taken; no claim the branch was taken. The complete nonzero
+traversal, per-zone managed-page publication, withheld global totalram,
+slab-unavailable, IRQ-disabled CPU0 continuity and fresh bridge remain
+proven. No later preparation, buddy insertion or mem_init.
 
-MM3B8A BLUE physically proves the complete promoted MM3B7 release traversal can
-genuinely call and enter `__free_pages_ok()` for every processed chunk and
-return through a frozen first-operation entry stop before the first page-derived
-load. No `__free_pages_prepare()`, `free_one_page()`, `__free_one_page()`, or
-buddy insertion executes on the frozen lane. Per-zone managed pages remain
-published while global `_totalram_pages` stays zero, and the outer stop remains
-before `mem_init()`.
+Immediate previous proven checkpoint (MM3B8B3 GREEN):
 
-Captain reported the decoded BLUE `#0000ff` PASS meaning. The checkpoint remains
-installed.
+`1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b`
 
-Previous proven MAINLINE checkpoint:
+Kernel source: `fe8cbddba495439664c2ca58a64b2bfff76efc8b`
 
-`0dba62ce0f0ff5042e5ed0ad1523db51fdf15de7db50cafd69dad9e9ceed3ba9`
-
-The previous checkpoint is MM3B7 CYAN. It proves complete metadata normalization
-and per-zone managed-page publication while stopping before `__free_pages_ok()`.
+All deeper promoted checkpoints preserved; original B1 GOLD inconclusive
+and failed MM3B8 are not promotable or rollback lineage. See
+`2026-11-27-mm-core-init-mm3b8b-phase-proof.md`.
 
 ### Android RECOVERY checkpoint
 
@@ -58,8 +57,8 @@ target after a failed mainline experiment.
 
 ```text
 latest proven MAINLINE checkpoint
-    -> plan one bounded tranche
-    -> independent plan review
+    -> plan one bounded phase (2-4 checkpoints)
+    -> independent phase-plan review
     -> build/freeze exact candidate
     -> independent frozen-candidate review
     -> install candidate

@@ -162,6 +162,6 @@ Result: **PASS**.
 
 ## Proven consequence
 
-MM3B8A is promoted to MAINLINE and remains installed.
+MM3B8A was promoted to MAINLINE on 2026-10-02. See CURRENT.md for the later promoted frontier.
 
 The next unexecuted production work is the stop-false `__free_pages_ok()` front porch: production `page_to_pfn(page)` / `page_zone(page)` materialization followed by the inlined `__free_pages_prepare()` prefix.

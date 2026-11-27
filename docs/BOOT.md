@@ -1495,7 +1495,7 @@ See `docs/2026-09-28-setup-command-line-proof.md`.
 
 ## Memory-core MM3B8A: `__free_pages_ok()` entry plumbing
 
-MM3B8A is the current promoted MAINLINE BOOT:
+MM3B8A was the promoted MAINLINE BOOT on 2026-10-02:
 
 `33f39b5412d206990b264736da7ee9b8fa83c970708baab73c14e2e5e16f095e`
 
@@ -1515,3 +1515,18 @@ complete memblock release traversal, while still excluding all page-derived
 preparation and buddy insertion.
 
 See `docs/2026-10-02-mm-core-init-mm3b8a-proof.md`.
+
+## Memory-core MM3B8B: preparation prefix complete
+
+MM3B8B4 GREEN is the promoted MAINLINE BOOT as of 2026-11-27:
+
+`7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
+
+Source `1a7581e134a5774fc009a8c9ee99905e700b5702`. B3 `1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b` is immediate rollback. Both clean
+Colt builds and both loader/BOOT pairs reproduced exactly. Preserve the
+immutable Android recovery and all older proven checkpoints.
+
+This completes the R1 preparation-prefix ladder, not complete allocator
+initialization. The next physical frontier is the production HWPoison
+conditional and subsequent compound/tail/metadata preparation. See
+`docs/2026-11-27-mm-core-init-mm3b8b-phase-proof.md` and CURRENT.md.

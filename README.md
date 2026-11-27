@@ -73,28 +73,30 @@ Generated binaries and compiler build trees do not belong in Git.
 
 ## Current proven kernel boundary
 
-Current proven kernel source: `fe8cbddba495439664c2ca58a64b2bfff76efc8b`
+Current proven kernel source: `1a7581e134a5774fc009a8c9ee99905e700b5702`
 
-Current proven BOOT: `1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b`
+Current proven BOOT: `7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
 
-MM3B8B3 physically passed GREEN `#00ff00` under the independently accepted
-fresh-boot full-slot decoder. Every processed chunk completes cumulative B2
-obligations and the configured preparation prefix through the memcg condition,
-then returns false at the frozen stop. Independent source/linked review
-establishes the disabled memcg key and excludes its early enable path; the
-optional uncharge and its transitive effects do not execute. PageTail assertion,
+MM3B8B4 physically passed GREEN `#00ff00` under the independently accepted
+fresh-boot full-slot decoder. This completes the R1 preparation-prefix phase.
+Every processed chunk completes cumulative B3 obligations and the actual
+mlocked decision, including existing clear/stat/event operations if taken,
+then returns false at the common frozen stop before HWPoison-specific work.
+Independent review establishes accounting-callee containment, initialized
+boot-time per-CPU storage and IRQ preservation; actual scheduling excluded.
+The memcg key remains disabled on the admitted boot lane. PageTail assertion,
 tracepoint and KMSAN are configuration-elided, not dynamically exercised.
 Complete nonzero traversal and per-zone publication survive. The wrapper
 returns before global totalram publication and the outer stop before mem_init.
 Totalram remains zero, slab unavailable, IRQs disabled, CPU0 continuity and
-fresh bridge intact. No computed-pointer correctness, specific initializer
-alternative, mlocked operation, later preparation or buddy insertion claimed.
+fresh bridge intact. No claim of mlocked=true, uncharge, stat values,
+computed-pointer correctness, HWPoison, later preparation or buddy insertion.
 
-Next: MM3B8B4, through the complete production mlocked block, stopping before
-any HWPoison-specific load/test. Both optimized mlocked outcomes must reach
-the frozen false-return boundary; no claim the taken branch actually ran
-without independent evidence. Permanent GREEN decoder remains.
+Next phase: isolate HWPoison and the compound/tail and subsequent metadata
+preparation region. New independent phase-plan acceptance required before
+implementation. The permanent GREEN decoder remains.
 
 The original B1 GOLD remains inconclusive. Build-input provenance, exact
-rollback and physical decoder: `docs/CURRENT.md` and
-`docs/bring-up-lineage.html#mm3b8b3`.
+rollback and physical decoder: `docs/CURRENT.md`,
+`docs/2026-11-27-mm-core-init-mm3b8b-phase-proof.md` and
+`docs/bring-up-lineage.html#mm3b8b4`.
