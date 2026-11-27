@@ -2,34 +2,33 @@
 
 ## Proven MAINLINE
 
-Kernel commit: `1a7581e134a5774fc009a8c9ee99905e700b5702`
+Kernel commit: `194e8337497bc3f60339e939a91dafeb57fc663e`
 
-BOOT: `7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
+BOOT: `58d5de4272216f4baa58c78507c07d777aafe2ba008e75acfe0d7d3d27a04d17`
 
-Promoted checkpoint: **MM3B8B4 GREEN** (2026-11-27).
+Promoted checkpoint: **MM3B8C1 GREEN** (2026-11-27).
 
-MM3B8B4 physically passed GREEN `#00ff00` under the independently accepted
-fresh-boot full-slot decoder. This completes the R1 preparation-prefix phase.
-Every processed chunk completes cumulative B3 obligations and the actual
-mlocked decision, including existing clear/stat/event operations if taken,
-then returns false at the common frozen stop before HWPoison-specific work.
-Independent review establishes accounting-callee containment, initialized
-boot-time per-CPU storage and IRQ preservation; actual scheduling excluded.
-The memcg key remains disabled on the admitted boot lane. PageTail assertion,
-tracepoint and KMSAN are configuration-elided, not dynamically exercised.
-Complete nonzero traversal and per-zone publication survive. The wrapper
-returns before global totalram publication and the outer stop before mem_init.
-Totalram remains zero, slab unavailable, IRQs disabled, CPU0 continuity and
-fresh bridge intact. No claim of mlocked=true, uncharge, stat values,
-computed-pointer correctness, HWPoison, later preparation or buddy insertion.
+MM3B8C1 physically passed GREEN `#00ff00` under the independently accepted
+fresh-boot decoder. Every processed chunk completes cumulative B4 obligations
+and the original-page HWPoison/order-zero decision, preserving the genuine
+poisoned/order-zero production false return if applicable; other predicate
+outcomes reach the common frozen false stop. Complete nonzero traversal and
+per-zone publication survive. The wrapper returns before global totalram and
+the outer stop before mem_init. Totalram zero, slab unavailable, IRQs disabled,
+CPU0 continuity and fresh bridge intact. No claim every chunk read the
+diagnostic byte, actual poison/mlocked/order outcome, positive-order tail
+execution or validated metadata. No order-driven tail, anon/type/head
+validation, later preparation or buddy insertion.
 
-Next phase: isolate HWPoison and the compound/tail and subsequent metadata
-preparation region. New independent phase-plan acceptance required before
-implementation. The permanent GREEN decoder remains.
+Next: C2 compound/order and complete tail loop. Independently establish
+initialized released-range membership, intervening writers/aliases,
+nonvacuous normal-lane continuation and bad-page-effect exclusion for every
+processed chunk. HOLD if proof fails. Enabled check-pages must be preserved.
+No new witness/forcing/error swallowing approved.
 
-The release string remains deliberately pinned to original B1 as build
-metadata, not source identity. The original B1 GOLD remains inconclusive,
-not promoted. See `2026-11-27-mm-core-init-mm3b8b-phase-proof.md`.
+The release string remains deliberately pinned to original B1 as metadata,
+not source identity. B-phase proof and inconclusive original B1 GOLD:
+`2026-11-27-mm-core-init-mm3b8b-phase-proof.md`. C-phase proof batched at completion.
 
 ## Build-input provenance
 
@@ -48,12 +47,27 @@ B3 independent review revalidated the bounded exception (verdict SHA256
 `fba60e0c200defbf4488b97def175d8a4f5186fcd7fda5306eddbce71620af57`).
 B4 independent review revalidated the bounded exception (verdict SHA256
 `8214884743cfec366de81c4da2f63278be4b663d05f3e0b327c98eb663f5519b`).
+C1 revalidated the bounded certificate-only exception and both actual clean
+builds (verdict SHA256 `d5de0043a963f2ab458b3b429afd185ec0623c37a7547732fd3d377b689ea5f4`).
+
+## Accepted C-phase build cadence
+
+Exact independent BUILD CADENCE ACCEPT SHA256
+`2c3bef1d3d51fe51d694d35513c4bc02484841e8be882913e7c7741975c2edd5`
+(plan SHA256 `374d48aa9e15f229e89f41095d1b86b36faec654b958a09ab658c568254b4b0f`).
+C1 retains two actual reproducible clean kernel builds. Ordinary C2/C3 may
+use one genuine clean build with unchanged qualified inputs and recipe;
+within-candidate reproduction then NOT_TESTED. C4, changed inputs/recipe,
+drift, uncertain provenance, nondeterminism, outside scope or reviewer
+request require two. No retrospective reproducibility claim. All other
+gates including both loader/BOOT pairs remain. Later phases require explicit
+cadence reacceptance.
 
 ## Immediate rollback
 
-Promoted MM3B8B3 BOOT: `1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b`
+Promoted MM3B8B4 BOOT: `7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
 
-Kernel source: `fe8cbddba495439664c2ca58a64b2bfff76efc8b`
+Kernel source: `1a7581e134a5774fc009a8c9ee99905e700b5702`
 
 Separate immutable Android recovery remains
 `1a78e5117cf23b3cab5547da2369018066c9ddac27307e97fce46026647ae2f9`.
@@ -72,4 +86,4 @@ are the reusable checkpoint slot. Only a uniform stable full-slot GREEN after
 a positively identified fresh exact candidate boot is PASS. YELLOW pre-fail,
 WHITE entered, RED returned/post-fail. Historical palettes are candidate-specific.
 
-See `bring-up-lineage.html#mm3b8b4`.
+See `bring-up-lineage.html#mm3b8c1`.
