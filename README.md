@@ -73,23 +73,26 @@ Generated binaries and compiler build trees do not belong in Git.
 
 ## Current proven kernel boundary
 
-Current proven kernel source: `5cecb81f77d7121c3370206f898ac50daacb2668`
+Current proven kernel source: `82446e644a543b19c8c72ebd2e99864acb4e5a92`
 
-Current proven BOOT: `42cdd5db65209346b2649bd3e58559d434b6008afc44feecc5c9a3bde03dd806`
+Current proven BOOT: `5deb82eb52f64057372d768c226a2ae9163324c76d82c7893f62dbe8ec159833`
 
-MM3B8B1-P1 physically passed GREEN `#00ff00`, under the independently accepted
-fresh-boot full-slot decoder. The original B1 GOLD observation remains
-inconclusive. P1 preserves the exact B1 allocator semantics and reserves GREEN
-for the active success writer. Every processed chunk completes production PFN
-and zone materialization before the frozen first-semantic-operation preparation
-stop returns false. Complete range/chunk traversal, nonzero accumulation and
-per-zone managed-page publication survive. No preparation initializer/body or
-buddy insertion executes. Global totalram stays zero; slab unavailable, IRQs
-disabled, CPU0 continuity and fresh final bridge intact. Computed PFN/zone
-correctness or a new zone-pointer dereference are not claimed.
+MM3B8B2 physically passed GREEN `#00ff00` under the independently accepted
+fresh-boot full-slot decoder. Every processed chunk completes P1 PFN/zone
+materialization, the preparation initializers (KASAN constant, init-on-free
+Boolean, compound test and folio value), the physical false FPI_PREPARED guard
+and frozen false return. Complete nonzero traversal and per-zone publication
+survive. The wrapper returns before global totalram publication and the outer
+stop before mem_init. Totalram remains zero, slab unavailable, IRQs disabled,
+CPU0 continuity and fresh bridge intact. No computed-pointer correctness or
+dereference, specific static-key/compound outcome, B3 work or buddy insertion
+is claimed.
 
-The next accepted checkpoint is MM3B8B2, covering the preparation initializers
-and false FPI_PREPARED guard. It must retain P1's cumulative obligations and
-permanent palette; no B3 operation may execute.
+Next: MM3B8B3, covering the PageTail assertion/trace/KMSAN and conditional
+memcg-kmem prefix, stopping before the mlocked-specific load/test or effects.
+Config-elided operations remain described as such; runtime branches are
+path-scoped. Permanent GREEN decoder and cumulative obligations remain.
 
-See `docs/CURRENT.md` and `docs/bring-up-lineage.html#mm3b8b1-p1`.
+The original B1 GOLD remains inconclusive. Build-input provenance, exact
+rollback and physical decoder: `docs/CURRENT.md` and
+`docs/bring-up-lineage.html#mm3b8b2`.
