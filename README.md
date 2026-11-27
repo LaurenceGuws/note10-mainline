@@ -73,27 +73,28 @@ Generated binaries and compiler build trees do not belong in Git.
 
 ## Current proven kernel boundary
 
-Current proven kernel source: `194e8337497bc3f60339e939a91dafeb57fc663e`
+Current proven kernel source: `a4e7c0e1fd3aa1028a22e53475cfd43967b5f183`
 
-Current proven BOOT: `58d5de4272216f4baa58c78507c07d777aafe2ba008e75acfe0d7d3d27a04d17`
+Current proven BOOT: `839e0ca76b59bc76a95039e48e5f131268f0b2a34a0ae07e6b1820edd84ff3a8`
 
-MM3B8C1 physically passed GREEN `#00ff00` under the independently accepted
-fresh-boot decoder. Every processed chunk completes cumulative B4 obligations
-and the original-page HWPoison/order-zero decision, preserving the genuine
-poisoned/order-zero production false return if applicable; other predicate
-outcomes reach the common frozen false stop. Complete nonzero traversal and
-per-zone publication survive. The wrapper returns before global totalram and
-the outer stop before mem_init. Totalram zero, slab unavailable, IRQs disabled,
-CPU0 continuity and fresh bridge intact. No claim every chunk read the
-diagnostic byte, actual poison/mlocked/order outcome, positive-order tail
-execution or validated metadata. No order-driven tail, anon/type/head
-validation, later preparation or buddy insertion.
+MM3B8C2 physically passed the accepted complete stable GREEN/BLUE striped
+decoder (operator report). Every selected chunk consumes actual completion
+after the original order/tail block; at least one positive-order chunk
+completes genuine enabled tail validation. The per-chunk identity/ownership
+witness, original core normalization/per-zone publication and full nonzero
+traversal are qualified under the independently reviewed bounded normal
+boot contract. The wrapper returns before global totalram and the outer stop
+before mem_init; totalram zero, slab unavailable, IRQs disabled, CPU0 continuity
+and fresh bridge intact. The read-only firmware selector guard excludes the
+optional unchecked KVM implementation discovery path on the admitted lane.
+No measured bitmap, actual count of pages/chunks, head anon/type or head
+validation, later preparation, buddy insertion or arbitrary corruption
+safety claim.
 
-Next: C2 compound/order and complete tail loop. Independently establish
-initialized released-range membership, intervening writers/aliases,
-nonvacuous normal-lane continuation and bad-page-effect exclusion for every
-processed chunk. HOLD if proof fails. Enabled check-pages must be preserved.
-No new witness/forcing/error swallowing approved.
+Next: C3 moves the same stop and completion together past the original
+anonymous-folio and page-type blocks, before head validation. Bound any
+taken stat decrement, mapping clear and type reset; preserve all C2 gates.
+No new mechanism or forced predicate outcomes.
 
 Build-input provenance, exact rollback, accepted C-phase cadence and physical
-decoder: `docs/CURRENT.md` and `docs/bring-up-lineage.html#mm3b8c1`.
+decoder: `docs/CURRENT.md` and `docs/bring-up-lineage.html#mm3b8c2`.
