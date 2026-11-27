@@ -73,28 +73,29 @@ Generated binaries and compiler build trees do not belong in Git.
 
 ## Current proven kernel boundary
 
-Current proven kernel source: `a4e7c0e1fd3aa1028a22e53475cfd43967b5f183`
+Current proven kernel source: `af9c624f814aa0763ee9b36eca54a460a949fe6b`
 
-Current proven BOOT: `839e0ca76b59bc76a95039e48e5f131268f0b2a34a0ae07e6b1820edd84ff3a8`
+Current proven BOOT: `73edf29e3a160baa227439b45eabb272e4a49ec0ac10a70781f9ec630f818b20`
 
-MM3B8C2 physically passed the accepted complete stable GREEN/BLUE striped
-decoder (operator report). Every selected chunk consumes actual completion
-after the original order/tail block; at least one positive-order chunk
-completes genuine enabled tail validation. The per-chunk identity/ownership
-witness, original core normalization/per-zone publication and full nonzero
-traversal are qualified under the independently reviewed bounded normal
-boot contract. The wrapper returns before global totalram and the outer stop
-before mem_init; totalram zero, slab unavailable, IRQs disabled, CPU0 continuity
-and fresh bridge intact. The read-only firmware selector guard excludes the
-optional unchecked KVM implementation discovery path on the admitted lane.
-No measured bitmap, actual count of pages/chunks, head anon/type or head
-validation, later preparation, buddy insertion or arbitrary corruption
-safety claim.
+MM3B8C3 physically passed the accepted complete stable GREEN/BLUE striped
+decoder (operator report). Every selected chunk completes the cumulative
+C2 order/tail block, original anonymous-folio and page-type decisions,
+and any taken bounded per-CPU stat decrement, mapping clear and type
+reset. At least one positive-order chunk completes actual enabled tail
+validation. Identity/ownership witness, per-zone publication, full nonzero
+traversal and both outer/public gates are qualified under the independently
+reviewed bounded normal boot contract. Global totalram zero, slab
+unavailable, IRQs disabled, CPU0 continuity and fresh bridge intact.
+The firmware guard remains unchanged. No claim either new predicate
+was true, actual stat value, page count, head validation, later
+preparation, buddy insertion or arbitrary corruption safety.
 
-Next: C3 moves the same stop and completion together past the original
-anonymous-folio and page-type blocks, before head validation. Bound any
-taken stat decrement, mapping clear and type reset; preserve all C2 gates.
-No new mechanism or forced predicate outcomes.
+Next: C4 moves the same stop and COMPLETE past the complete original
+head-validation/bad-return block, before page_cpupid_reset_last.
+Actual enabled validator, fail-closed active error handling and inactive
+production error/false-return semantics retained. Two genuine clean
+kernel builds required. C4 closes metadata/validation only, not all
+preparation. No new mechanism.
 
 Build-input provenance, exact rollback, accepted C-phase cadence and physical
-decoder: `docs/CURRENT.md` and `docs/bring-up-lineage.html#mm3b8c2`.
+decoder: `docs/CURRENT.md` and `docs/bring-up-lineage.html#mm3b8c3`.
