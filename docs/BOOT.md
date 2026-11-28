@@ -1518,11 +1518,11 @@ See `docs/2026-10-02-mm-core-init-mm3b8a-proof.md`.
 
 ## Memory-core MM3B8B: preparation prefix complete
 
-MM3B8B4 GREEN is the promoted MAINLINE BOOT as of 2026-11-27:
+MM3B8B4 GREEN was the promoted MAINLINE BOOT on 2026-11-27:
 
 `7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
 
-Source `1a7581e134a5774fc009a8c9ee99905e700b5702`. B3 `1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b` is immediate rollback. Both clean
+Source `1a7581e134a5774fc009a8c9ee99905e700b5702`. B3 `1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b` was its immediate rollback. Both clean
 Colt builds and both loader/BOOT pairs reproduced exactly. Preserve the
 immutable Android recovery and all older proven checkpoints.
 
@@ -1530,3 +1530,22 @@ This completes the R1 preparation-prefix ladder, not complete allocator
 initialization. The next physical frontier is the production HWPoison
 conditional and subsequent compound/tail/metadata preparation. See
 `docs/2026-11-27-mm-core-init-mm3b8b-phase-proof.md` and CURRENT.md.
+
+## Memory-core MM3B8C: metadata and validation complete
+
+MM3B8C4 GREEN/BLUE is promoted on 2026-11-28:
+
+`76a1de3c0bf42009f482fb82d85ef78a16569167892f40266270e7d1b8c30c00`
+
+Source: `948d674a23f4571228c7b088c49967e83d3efd92`.
+Immediate rollback: C3 `73edf29e3a160baa227439b45eabb272e4a49ec0ac10a70781f9ec630f818b20`.
+
+Both clean kernel builds and both loader/BOOT pairs reproduced exactly.
+The envelope is unchanged (57,671,680 bytes, header v1, page size 2048,
+kernel slot 48,424,984 bytes). Relative to C3 only embedded Image and
+legacy header ID changed. Known stale AVB descriptor verification
+failure is retained, not a cryptographic validation PASS.
+C4 qualified the original head validation and zero-bad decision
+across the complete selected release traversal; later preparation
+and buddy insertion remain excluded. See CURRENT.md and
+`2026-11-28-mm-core-init-mm3b8c-phase-proof.md`.

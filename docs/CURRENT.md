@@ -2,42 +2,43 @@
 
 ## Proven MAINLINE
 
-Kernel commit: `af9c624f814aa0763ee9b36eca54a460a949fe6b`
+Kernel commit: `948d674a23f4571228c7b088c49967e83d3efd92`
 
-BOOT: `73edf29e3a160baa227439b45eabb272e4a49ec0ac10a70781f9ec630f818b20`
+BOOT: `76a1de3c0bf42009f482fb82d85ef78a16569167892f40266270e7d1b8c30c00`
 
-Promoted checkpoint: **MM3B8C3 GREEN/BLUE PASS** (2026-11-27).
+Promoted checkpoint: **MM3B8C4 GREEN/BLUE PASS** (2026-11-28).
 
-MM3B8C3 physically passed the accepted complete stable GREEN/BLUE striped
+MM3B8C4 physically passed the accepted complete stable GREEN/BLUE striped
 decoder (operator report). Every selected chunk completes the cumulative
-C2 order/tail block, original anonymous-folio and page-type decisions,
-and any taken bounded per-CPU stat decrement, mapping clear and type
-reset. At least one positive-order chunk completes actual enabled tail
-validation. Identity/ownership witness, per-zone publication, full nonzero
-traversal and both outer/public gates are qualified under the independently
-reviewed bounded normal boot contract. Global totalram zero, slab
-unavailable, IRQs disabled, CPU0 continuity and fresh bridge intact.
-The firmware guard remains unchanged. No claim either new predicate
-was true, actual stat value, page count, head validation, later
-preparation, buddy insertion or arbitrary corruption safety.
+C3 prefix, original enabled head validator and genuine zero-bad gate.
+Every selected positive-order tail completes actual enabled validation,
+with at least one completed positive-order chunk. Identity/ownership
+witness, per-zone managed-page publication, full nonzero traversal and
+both outer/public gates are qualified under the independently reviewed
+bounded normal/nonfaulting early-boot contract. Global totalram zero,
+slab unavailable, IRQs masked, CPU0 continuity and fresh bridge intact.
+The read-only firmware guard remains unchanged. No active early-false
+or error reporting on the passing lane. No actual individual anon/type
+outcome, stat value, release count or arbitrary hardware safety claim.
 
-Next: C4 moves the same stop and COMPLETE past the complete original
-head-validation/bad-return block, before page_cpupid_reset_last.
-Actual enabled validator, fail-closed active error handling and inactive
-production error/false-return semantics retained. Two genuine clean
-kernel builds required. C4 closes metadata/validation only, not all
-preparation. No new mechanism.
+The C metadata/validation phase is complete, not complete preparation
+or allocator readiness. The stop precedes page_cpupid_reset_last(page),
+head flags/private normalization and all subsequent preparation.
+No buddy insertion, mem_init, slab initialization or UFS I/O proven.
+Next phase requires a separately reviewed bounded plan and explicit
+cadence reacceptance before further implementation or flash.
 
 Independent FINAL ACCEPT SHA256
-`59fd5df9f8cfad130f7c57a3704a93afd8911f4b87ffa8b8a89b3eb1b70856bf`.
-Frozen 304-member manifest SHA256
-`93f0d784be84ab028e7f18da171dc6f3f96764fa0274c92ad1d9efbf3a389ca9`.
-BOOT-only upload succeeded 21:43:11 SAST; subsequent operator-reported
-PASS. No independent screenshot or readback. One genuine clean C3 build
-accepted under ordinary cadence; same-input reproduction NOT_TESTED.
-Both loader/BOOT packages identical. Prior C2 guarded and preguard
-build pairs retained. Release string pinned metadata, not source identity.
-C-phase proof batched at completion.
+`3a05976914c160d0b4b379042b9021f040ae6883e8651f7c11bf4626a5c3bce8`.
+Frozen 319-member manifest SHA256
+`ee9f15e453e717a2b11034548aa4405eaf06d2aafd93862a4ebfa5b5b0082563`.
+BOOT-only upload succeeded 2026-11-28 14:07:47 SAST; subsequent operator
+PASS. No independent screen or partition readback. Both clean C4
+builds and both loader/BOOT packages reproduced. C3 reproduction
+remains NOT_TESTED. Both C2 build pairs retained. Release string is
+pinned metadata, not current source identity.
+C-phase closure: `2026-11-28-mm-core-init-mm3b8c-phase-proof.md`.
+B-phase history: `2026-11-27-mm-core-init-mm3b8b-phase-proof.md`.
 
 ## Build-input provenance
 
@@ -71,15 +72,17 @@ guard acceptance
 `c39917417cb6c3f1d92a8a786e61dff8181e77674a0ecdb250e499005afdb006`.
 C3 used one genuine clean build with unchanged qualified mechanism, inputs
 and recipe; independently accepted, within-candidate reproduction NOT_TESTED.
-C4, changed inputs/recipe, drift, uncertain provenance, nondeterminism,
-outside scope or reviewer request require two. Both loader/BOOT pairs
-remain mandatory. Later phases require explicit cadence reacceptance.
+C4 mandatory two clean builds reproduced all six artifacts. C3 remains
+NOT_TESTED for same-input reproduction. Both loader/BOOT pairs mandatory.
+The accepted C-phase cadence is complete. Later phases require explicit
+cadence reacceptance, including changed inputs/recipe, drift, uncertain
+provenance, nondeterminism, outside scope or reviewer-requested reproduction.
 
 ## Immediate rollback
 
-Promoted MM3B8C2 BOOT: `839e0ca76b59bc76a95039e48e5f131268f0b2a34a0ae07e6b1820edd84ff3a8`
+Promoted MM3B8C3 BOOT: `73edf29e3a160baa227439b45eabb272e4a49ec0ac10a70781f9ec630f818b20`
 
-Kernel source: `a4e7c0e1fd3aa1028a22e53475cfd43967b5f183`
+Kernel source: `af9c624f814aa0763ee9b36eca54a460a949fe6b`
 
 Separate immutable Android recovery remains
 `1a78e5117cf23b3cab5547da2369018066c9ddac27307e97fce46026647ae2f9`.
@@ -103,4 +106,4 @@ Any partial, muted, stale, reset or uncertain observation does not promote.
 Historical palettes remain candidate-specific. No transient required.
 Hardware watchdog behavior not newly measured.
 
-See `bring-up-lineage.html#mm3b8c3`.
+See `bring-up-lineage.html#mm3b8c4`.

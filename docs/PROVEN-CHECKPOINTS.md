@@ -18,30 +18,30 @@ The newest exact BOOT that has passed:
 This is the normal progression parent and routine rollback target for the next
 mainline tranche.
 
-Current promoted MAINLINE checkpoint (MM3B8B4 GREEN):
+Current promoted MAINLINE checkpoint (MM3B8C4 GREEN/BLUE):
 
-`7e1b7a52766837885e316cd583e7b21ac38220b402f8c8994616f778b7323455`
+`76a1de3c0bf42009f482fb82d85ef78a16569167892f40266270e7d1b8c30c00`
 
-Kernel source: `1a7581e134a5774fc009a8c9ee99905e700b5702`
+Kernel source: `948d674a23f4571228c7b088c49967e83d3efd92`
 
-R1 preparation-prefix phase complete. Every processed chunk completes the
-cumulative PFN/zone, initializer, physical prepared-false, disabled memcg
-condition and mlocked decision boundary, then returns false before
-HWPoison-specific work. Conditional mlocked accounting operations are
-qualified if taken; no claim the branch was taken. The complete nonzero
-traversal, per-zone managed-page publication, withheld global totalram,
-slab-unavailable, IRQ-disabled CPU0 continuity and fresh bridge remain
-proven. No later preparation, buddy insertion or mem_init.
+C metadata/validation phase complete. Every selected chunk completed
+the original enabled head validator and genuine zero-bad decision
+after cumulative C3 effects; at least one completed positive-order
+chunk and all its selected tails validated. Full nonzero traversal,
+per-zone managed publication, withheld global totalram, slab unavailable,
+IRQ-masked CPU0 continuity and fresh bridge remain qualified.
+No later preparation, buddy insertion or mem_init.
 
-Immediate previous proven checkpoint (MM3B8B3 GREEN):
+Immediate previous proven checkpoint (MM3B8C3 GREEN/BLUE):
 
-`1561eb4b691e6cbb7c4c4b727de020c10538aefa936e0cc0cfb3c2fbd9d2203b`
+`73edf29e3a160baa227439b45eabb272e4a49ec0ac10a70781f9ec630f818b20`
 
-Kernel source: `fe8cbddba495439664c2ca58a64b2bfff76efc8b`
+Kernel source: `af9c624f814aa0763ee9b36eca54a460a949fe6b`
 
-All deeper promoted checkpoints preserved; original B1 GOLD inconclusive
-and failed MM3B8 are not promotable or rollback lineage. See
-`2026-11-27-mm-core-init-mm3b8b-phase-proof.md`.
+All deeper promoted checkpoints preserved; original B1 GOLD inconclusive,
+failed MM3B8 and unflashed preguard C2 are not promoted rollback parents.
+See `2026-11-28-mm-core-init-mm3b8c-phase-proof.md`.
+New phase plan/review and cadence acceptance required before advancing.
 
 ### Android RECOVERY checkpoint
 
